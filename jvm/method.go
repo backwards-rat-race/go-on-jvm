@@ -1,12 +1,19 @@
 package jvm
 
-import "io"
+import (
+	"go-on-jvm/jvm/constants"
+	"io"
+)
 
 type Method struct {
 	Name   string
-	Access AccessModifier
+	Access []AccessModifier
 }
 
-func (m Method) Compile(io.Writer) error {
-	panic("implement me")
+func (m Method) Compile(w io.Writer) error {
+	return nil
+}
+
+func (m Method) fillConstantsPool(pool *constants.ConstantPool) {
+
 }
