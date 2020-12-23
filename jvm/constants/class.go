@@ -11,7 +11,7 @@ func newClassConstant() ClassReferenceItem {
 	return ClassReferenceItem{}
 }
 
-func (c ClassReferenceItem) isTag(tag PoolConstantTag) bool {
+func (c ClassReferenceItem) isTag(tag ConstantPoolTag) bool {
 	return tag == ClassReference
 }
 

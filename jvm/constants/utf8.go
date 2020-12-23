@@ -11,7 +11,7 @@ type Utf8Item struct {
 	Value string
 }
 
-func (u Utf8Item) isTag(tag PoolConstantTag) bool {
+func (u Utf8Item) isTag(tag ConstantPoolTag) bool {
 	return tag == Utf8
 }
 

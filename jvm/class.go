@@ -11,6 +11,7 @@ type Class struct {
 	Access     []AccessModifier
 	Super      string
 	Implements []string
+	Fields     []Field
 	Methods    []Method
 }
 
@@ -20,6 +21,10 @@ func NewClass(name string, super string) *Class {
 
 func (c *Class) WithAccess(modifier ...AccessModifier) {
 	c.Access = modifier
+}
+
+func (c *Class) AddField(field Field) {
+	c.Fields = append(c.Fields, field)
 }
 
 func (c Class) Compile(w io.Writer) (err error) {
@@ -40,12 +45,27 @@ func (c Class) Compile(w io.Writer) (err error) {
 		return
 	}
 
-	err = c.writeAccess(w)
+	err = writeAccessModifier(w, c.Access)
 	if err != nil {
 		return
 	}
 
 	err = c.writeClassSpecifier(w, constantPool)
+	if err != nil {
+		return
+	}
+
+	err = c.writeFields(w, constantPool)
+	if err != nil {
+		return
+	}
+
+	err = c.writeMethods(w)
+	if err != nil {
+		return
+	}
+
+	err = c.writeAttributes(w)
 	if err != nil {
 		return
 	}
@@ -67,16 +87,14 @@ func (c Class) writeVersion(w io.Writer) error {
 func (c Class) fillConstantPool(pool *constants.ConstantPool) {
 	pool.AddClassReference(c.Name)
 	pool.AddClassReference(c.Super)
-}
 
-func (c Class) writeAccess(w io.Writer) error {
-	var access int
-
-	for _, modifier := range c.Access {
-		access |= int(modifier)
+	for _, field := range c.Fields {
+		field.fillConstantsPool(pool)
 	}
 
-	return jvmio.WritePaddedBytes(w, access, 2)
+	for _, method := range c.Methods {
+		method.fillConstantsPool(pool)
+	}
 }
 
 func (c Class) writeClassSpecifier(w io.Writer, pool *constants.ConstantPool) error {
@@ -92,27 +110,46 @@ func (c Class) writeClassSpecifier(w io.Writer, pool *constants.ConstantPool) er
 
 	_, err = w.Write([]byte{
 		0x00, 0x00, // Interfaces count
-		0x00, 0x00, // Fields count
 	})
+	return err
+}
 
-	err = jvmio.WritePaddedBytes(w, len(c.Methods), 2)
+// TODO, reduce duplication of writeFields and writeMethods
+
+func (c Class) writeFields(w io.Writer, pool *constants.ConstantPool) error {
+	err := jvmio.WritePaddedBytes(w, len(c.Fields), 2)
 	if err != nil {
 		return err
 	}
 
-	// Attributes count
-	_, err = w.Write([]byte{0x00, 0x00})
-	return err
-}
-
-func (c Class) writeMethods(w io.Writer, pool *constants.ConstantPool) error {
-	for _, method := range c.Methods {
-		method.fillConstantsPool(pool)
-
-		err := method.Compile(w)
+	for _, field := range c.Fields {
+		err = newFieldCompiler(field, pool).Compile(w)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
+}
+
+func (c Class) writeMethods(w io.Writer) error {
+	err := jvmio.WritePaddedBytes(w, len(c.Methods), 2)
+	if err != nil {
+		return err
+	}
+
+	for _, method := range c.Methods {
+		err = method.Compile(w)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c Class) writeAttributes(w io.Writer) error {
+	// Attributes count
+	_, err := w.Write([]byte{0x00, 0x00})
+	return err
 }

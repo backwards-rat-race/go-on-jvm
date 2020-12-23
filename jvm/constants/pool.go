@@ -5,10 +5,10 @@ import (
 	"io"
 )
 
-type PoolConstantTag int
+type ConstantPoolTag int
 
 const (
-	_ PoolConstantTag = iota
+	_ ConstantPoolTag = iota
 	Utf8
 	_
 	Int
@@ -31,13 +31,13 @@ const (
 	Package
 )
 
-func (c PoolConstantTag) write(w io.Writer) error {
+func (c ConstantPoolTag) write(w io.Writer) error {
 	_, err := w.Write([]byte{byte(c)})
 	return err
 }
 
 type constantPoolItem interface {
-	isTag(tag PoolConstantTag) bool
+	isTag(tag ConstantPoolTag) bool
 	write(w io.Writer, index int) error
 }
 
@@ -74,14 +74,30 @@ func (c *ConstantPool) FindClassNameItem(name string) int {
 	return 0
 }
 
+func (c *ConstantPool) FindUTF8Item(value string) int {
+	for i, item := range c.Items {
+		if isUtf8(item, value) {
+			return i
+		}
+	}
+
+	return 0
+}
+
 func (c *ConstantPool) AddClassReference(name string) {
-	// No need to duplicate
 	if c.FindClassNameItem(name) > 0 {
 		return
 	}
 
 	c.addItem(newClassConstant())
 	c.addItem(newUtf8Constant(name))
+}
+
+func (c *ConstantPool) AddUTF8(value string) {
+	if c.FindUTF8Item(value) > 0 {
+		return
+	}
+	c.addItem(newUtf8Constant(value))
 }
 
 func (c *ConstantPool) addItem(item constantPoolItem) {
@@ -101,7 +117,7 @@ type poolSize struct {
 	constantPool *ConstantPool
 }
 
-func (p *poolSize) isTag(_ PoolConstantTag) bool {
+func (p *poolSize) isTag(_ ConstantPoolTag) bool {
 	return false
 }
 

@@ -48,6 +48,7 @@ func main() {
 
 	class := jvm.NewClass("HelloWorld", jvm.ObjectClass)
 	class.WithAccess(jvm.Super, jvm.Public)
+	class.AddField(jvm.NewField("field", jvm.Int, jvm.Public, jvm.Super))
 
 	err = class.Compile(f)
 	if err != nil {
