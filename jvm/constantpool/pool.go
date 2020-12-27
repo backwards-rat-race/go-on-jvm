@@ -1,4 +1,4 @@
-package constants
+package constantpool
 
 import (
 	jvmio "go-on-jvm/jvm/io"
@@ -104,10 +104,8 @@ func (c *ConstantPool) addItem(item constantPoolItem) {
 	c.Items = append(c.Items, item)
 }
 
-func NewConstantPool() *ConstantPool {
-	c := &ConstantPool{
-		make([]constantPoolItem, 0),
-	}
+func New() *ConstantPool {
+	c := &ConstantPool{}
 	c.addItem(newPoolSize(c))
 	return c
 }

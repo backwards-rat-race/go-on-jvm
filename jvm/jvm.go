@@ -22,6 +22,8 @@ const (
 	Enum
 )
 
+const NonFinalPublic AccessModifier = Super | Public
+
 const (
 	Void   = "V"
 	Int    = "I"
@@ -33,7 +35,7 @@ const (
 
 const ObjectClass = "java/lang/Object"
 
-type Instruction interface {
+type Compilable interface {
 	Compile(w io.Writer) error
 }
 

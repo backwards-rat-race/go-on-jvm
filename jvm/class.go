@@ -1,7 +1,7 @@
 package jvm
 
 import (
-	"go-on-jvm/jvm/constants"
+	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
 	"io"
 )
@@ -38,7 +38,7 @@ func (c Class) Compile(w io.Writer) (err error) {
 		return
 	}
 
-	constantPool := constants.NewConstantPool()
+	constantPool := constantpool.New()
 	c.fillConstantPool(constantPool)
 	err = constantPool.Write(w)
 	if err != nil {
@@ -84,7 +84,7 @@ func (c Class) writeVersion(w io.Writer) error {
 	return err
 }
 
-func (c Class) fillConstantPool(pool *constants.ConstantPool) {
+func (c Class) fillConstantPool(pool *constantpool.ConstantPool) {
 	pool.AddClassReference(c.Name)
 	pool.AddClassReference(c.Super)
 
@@ -97,7 +97,7 @@ func (c Class) fillConstantPool(pool *constants.ConstantPool) {
 	}
 }
 
-func (c Class) writeClassSpecifier(w io.Writer, pool *constants.ConstantPool) error {
+func (c Class) writeClassSpecifier(w io.Writer, pool *constantpool.ConstantPool) error {
 	err := jvmio.WritePaddedBytes(w, pool.FindClassNameItem(c.Name), 2)
 	if err != nil {
 		return err
@@ -116,7 +116,7 @@ func (c Class) writeClassSpecifier(w io.Writer, pool *constants.ConstantPool) er
 
 // TODO, reduce duplication of writeFields and writeMethods
 
-func (c Class) writeFields(w io.Writer, pool *constants.ConstantPool) error {
+func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
 	err := jvmio.WritePaddedBytes(w, len(c.Fields), 2)
 	if err != nil {
 		return err

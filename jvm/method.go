@@ -1,7 +1,7 @@
 package jvm
 
 import (
-	"go-on-jvm/jvm/constants"
+	"go-on-jvm/jvm/constantpool"
 	"io"
 )
 
@@ -14,6 +14,6 @@ func (m Method) Compile(w io.Writer) error {
 	return nil
 }
 
-func (m Method) fillConstantsPool(pool *constants.ConstantPool) {
+func (m Method) fillConstantsPool(pool *constantpool.ConstantPool) {
 
 }

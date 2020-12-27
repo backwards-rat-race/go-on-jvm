@@ -1,7 +1,7 @@
 package jvm
 
 import (
-	"go-on-jvm/jvm/constants"
+	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
 	"io"
 )
@@ -16,17 +16,17 @@ func NewField(name string, typeDescriptor string, access ...AccessModifier) Fiel
 	return Field{name, access, typeDescriptor}
 }
 
-func (f Field) fillConstantsPool(pool *constants.ConstantPool) {
+func (f Field) fillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddUTF8(f.Name)
 	pool.AddUTF8(f.Type)
 }
 
 type fieldCompiler struct {
 	Field
-	Pool *constants.ConstantPool
+	Pool *constantpool.ConstantPool
 }
 
-func newFieldCompiler(field Field, pool *constants.ConstantPool) *fieldCompiler {
+func newFieldCompiler(field Field, pool *constantpool.ConstantPool) *fieldCompiler {
 	return &fieldCompiler{field, pool}
 }
 

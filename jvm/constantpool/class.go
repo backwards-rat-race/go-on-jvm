@@ -1,4 +1,4 @@
-package constants
+package constantpool
 
 import (
 	jvmio "go-on-jvm/jvm/io"
