@@ -9,20 +9,26 @@ import (
 type AccessModifier int
 
 const (
-	Public = 1 << iota
-	_
-	_
-	_
+	Public AccessModifier = 1 << iota
+	Private
+	Protected
+	Static
 	Final
 	Super
+	Bridge
+	Transient
+	Native
 	Interface
 	Abstract
+	Strict
 	Synthetic
 	Annotation
 	Enum
-)
 
-const NonFinalPublic AccessModifier = Super | Public
+	Synchronised = Super
+	Volatile     = Bridge
+	VarArgs      = Transient
+)
 
 const (
 	Void   = "V"

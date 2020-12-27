@@ -27,6 +27,10 @@ func (c *Class) AddField(field Field) {
 	c.Fields = append(c.Fields, field)
 }
 
+func (c *Class) AddMethod(method Method) {
+	c.Methods = append(c.Methods, method)
+}
+
 func (c Class) Compile(w io.Writer) (err error) {
 	err = c.writeMagic(w)
 	if err != nil {
@@ -60,7 +64,7 @@ func (c Class) Compile(w io.Writer) (err error) {
 		return
 	}
 
-	err = c.writeMethods(w)
+	err = c.writeMethods(w, constantPool)
 	if err != nil {
 		return
 	}
@@ -132,14 +136,14 @@ func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
 	return nil
 }
 
-func (c Class) writeMethods(w io.Writer) error {
+func (c Class) writeMethods(w io.Writer, pool *constantpool.ConstantPool) error {
 	err := jvmio.WritePaddedBytes(w, len(c.Methods), 2)
 	if err != nil {
 		return err
 	}
 
 	for _, method := range c.Methods {
-		err = method.Compile(w)
+		err = newMethodCompiler(method, pool).Compile(w)
 		if err != nil {
 			return err
 		}

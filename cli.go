@@ -22,15 +22,14 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 
 func main() {
 	//fileSite := token.NewFileSet()
-	//pkgs, err := parser.ParseDir(fileSite, ".", nil, parser.AllErrors)
+	//file, err := parser.ParseFile(fileSite, "test.go", nil, parser.AllErrors)
 	//
 	//if err != nil {
 	//	panic(err)
 	//}
 	//
-	//for _, a := range pkgs {
-	//	ast.Walk(Visitor{}, a)
-	//}
+	//ast.Walk(Visitor{}, file)
+
 	//
 	//var w bytes.Buffer
 	//_, _ = fmt.Fprintf(&w, "%x", 0xCAFEBABE)
@@ -48,7 +47,10 @@ func main() {
 
 	class := jvm.NewClass("HelloWorld", jvm.ObjectClass)
 	class.WithAccess(jvm.Super, jvm.Public)
-	class.AddField(jvm.NewField("field", jvm.Int, jvm.Public, jvm.Super))
+	class.AddField(jvm.NewField("field", jvm.Int, jvm.Super, jvm.Public))
+	method := jvm.NewMethod("method", jvm.Public)
+	method.WithTypeDescriptor(jvm.Int)
+	class.AddMethod(method)
 
 	err = class.Compile(f)
 	if err != nil {
