@@ -1,34 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"go-on-jvm/jvm"
-	"go/ast"
-	"os"
+	"go-on-jvm/parser"
+	os "os"
 )
 
-type Visitor struct {
-}
-
-func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
-	if node == nil {
-		println("nil")
-	} else {
-		fmt.Printf("%#v\n", node)
-	}
-
-	return v
-}
-
 func main() {
-	//fileSite := token.NewFileSet()
-	//file, err := parser.ParseFile(fileSite, "test.go", nil, parser.AllErrors)
-	//
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//ast.Walk(Visitor{}, file)
+	parsed, err := parser.ParseDirectory("./example")
+	if err != nil {
+		panic(err)
+	}
+	_ = parsed
 
 	//
 	//var w bytes.Buffer
