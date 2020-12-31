@@ -41,8 +41,8 @@ const (
 
 const ObjectClass = "java/lang/Object"
 
-type Compilable interface {
-	Compile(w io.Writer) error
+type Serialisable interface {
+	Write(w io.Writer) error
 }
 
 func JavaPackageToJvmPackage(javaPackageName string) string {

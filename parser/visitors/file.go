@@ -2,14 +2,14 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 	"go/token"
 )
 
 type fileVisitor struct {
-	DeclarationContext structure.DeclarationContext
-	callback           visitedCallback
+	Encapsulated intermediate.Encapsulated
+	callback     visitedCallback
 }
 
 func (f *fileVisitor) OnComplete(callback visitedCallback) {
@@ -27,10 +27,10 @@ func (f *fileVisitor) Visit(node ast.Node) ast.Visitor {
 		//fmt.Printf("File: File Node %#v\n", node)
 
 	case *ast.GenDecl:
-		return newGenericDeclarationVisitor(f, node, &f.DeclarationContext)
+		return newGenericDeclarationVisitor(f, node, &f.Encapsulated)
 
 	case *ast.Ident:
-		f.DeclarationContext.Package = node.Name
+		f.Encapsulated.Package = node.Name
 		fmt.Printf("File: Ident Node %#v\n", node)
 		return nil
 
@@ -53,7 +53,7 @@ func (f *fileVisitor) Visit(node ast.Node) ast.Visitor {
 	return f
 }
 
-func newGenericDeclarationVisitor(parent ast.Visitor, node *ast.GenDecl, context *structure.DeclarationContext) ast.Visitor {
+func newGenericDeclarationVisitor(parent ast.Visitor, node *ast.GenDecl, context *intermediate.Encapsulated) ast.Visitor {
 	switch node.Tok {
 	case token.IMPORT:
 		visitor := importDeclarationVisitor{}
@@ -76,7 +76,7 @@ func newGenericDeclarationVisitor(parent ast.Visitor, node *ast.GenDecl, context
 
 	case token.TYPE:
 		visitor := typeVisitor{}
-		visitor.OnCompleteStruct(func(class structure.Class) {
+		visitor.OnCompleteStruct(func(class intermediate.Class) {
 			context.AddClass(class)
 		})
 		visitor.OnComplete(func(visitor astVisitor) ast.Visitor {

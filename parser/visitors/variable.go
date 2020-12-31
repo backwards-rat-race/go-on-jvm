@@ -2,12 +2,12 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
 type variableGroupVisitor struct {
-	VariableGroup structure.VariableGroup
+	VariableGroup intermediate.VariableGroup
 	callback      visitedCallback
 }
 
@@ -37,7 +37,7 @@ func (v *variableGroupVisitor) Visit(node ast.Node) ast.Visitor {
 }
 
 type variableDeclarationVisitor struct {
-	Variable structure.Variable
+	Variable intermediate.Variable
 	callback visitedCallback
 }
 

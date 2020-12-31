@@ -30,7 +30,7 @@ func newFieldCompiler(field Field, pool *constantpool.ConstantPool) *fieldCompil
 	return &fieldCompiler{field, pool}
 }
 
-func (f *fieldCompiler) Compile(w io.Writer) error {
+func (f *fieldCompiler) Write(w io.Writer) error {
 	err := writeAccessModifier(w, f.Access)
 	if err != nil {
 		return err

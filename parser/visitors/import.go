@@ -2,12 +2,12 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
 type importDeclarationVisitor struct {
-	Import   structure.Import
+	Import   intermediate.Import
 	callback visitedCallback
 }
 

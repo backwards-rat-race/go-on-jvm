@@ -35,7 +35,7 @@ func main() {
 	method.WithTypeDescriptor(jvm.Int)
 	class.AddMethod(method)
 
-	err = class.Compile(f)
+	err = class.Write(f)
 	if err != nil {
 		panic(err)
 	}

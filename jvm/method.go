@@ -50,7 +50,7 @@ func newMethodCompiler(method Method, pool *constantpool.ConstantPool) *methodCo
 	return &methodCompiler{method, pool}
 }
 
-func (m methodCompiler) Compile(w io.Writer) error {
+func (m methodCompiler) Write(w io.Writer) error {
 	err := writeAccessModifier(w, m.Access)
 	if err != nil {
 		return err

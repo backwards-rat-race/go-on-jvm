@@ -1,4 +1,6 @@
-package structure
+package intermediate
+
+import "fmt"
 
 type Parsed struct {
 	Packages []Package
@@ -9,30 +11,34 @@ func (p *Parsed) AddPackage(pkg Package) {
 }
 
 type Package struct {
-	Name                 string
-	DeclarationsContexts []DeclarationContext
+	Name           string
+	Encapsulations []Encapsulated
 }
 
-func (p *Package) AddDeclarationsContext(declarationsContext DeclarationContext) {
-	p.DeclarationsContexts = append(p.DeclarationsContexts, declarationsContext)
+func (p *Package) AddEncapsulation(encapsulated Encapsulated) error {
+	if encapsulated.Package != p.Name {
+		return fmt.Errorf("encapsulation package '%s' does not match parent package '%s'", encapsulated.Package, p.Name)
+	}
+	p.Encapsulations = append(p.Encapsulations, encapsulated)
+	return nil
 }
 
-type DeclarationContext struct {
+type Encapsulated struct {
 	Package   string
 	Imports   []Import
 	Variables []VariableGroup
 	Classes   []Class
 }
 
-func (d *DeclarationContext) AddImport(declarationImport Import) {
+func (d *Encapsulated) AddImport(declarationImport Import) {
 	d.Imports = append(d.Imports, declarationImport)
 }
 
-func (d *DeclarationContext) AddVariableGroup(variableGroup VariableGroup) {
+func (d *Encapsulated) AddVariableGroup(variableGroup VariableGroup) {
 	d.Variables = append(d.Variables, variableGroup)
 }
 
-func (d *DeclarationContext) AddClass(class Class) {
+func (d *Encapsulated) AddClass(class Class) {
 	d.Classes = append(d.Classes, class)
 }
 

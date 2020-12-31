@@ -2,12 +2,12 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
 type fieldListVisitor struct {
-	Fields   []structure.Field
+	Fields   []intermediate.Field
 	callback visitedCallback
 }
 
@@ -33,7 +33,7 @@ func (f *fieldListVisitor) Visit(node ast.Node) (w ast.Visitor) {
 }
 
 func (f *fieldListVisitor) addField(node *ast.Field) {
-	field := structure.Field{}
+	field := intermediate.Field{}
 
 	switch len(node.Names) {
 	case 0:

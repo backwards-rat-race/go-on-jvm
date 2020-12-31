@@ -2,11 +2,11 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
-type visitedStructCallback func(class structure.Class)
+type visitedStructCallback func(class intermediate.Class)
 
 type typeVisitor struct {
 	callback       visitedCallback

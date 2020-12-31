@@ -31,7 +31,7 @@ func (c *Class) AddMethod(method Method) {
 	c.Methods = append(c.Methods, method)
 }
 
-func (c Class) Compile(w io.Writer) (err error) {
+func (c Class) Write(w io.Writer) (err error) {
 	err = c.writeMagic(w)
 	if err != nil {
 		return
@@ -127,7 +127,7 @@ func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
 	}
 
 	for _, field := range c.Fields {
-		err = newFieldCompiler(field, pool).Compile(w)
+		err = newFieldCompiler(field, pool).Write(w)
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func (c Class) writeMethods(w io.Writer, pool *constantpool.ConstantPool) error 
 	}
 
 	for _, method := range c.Methods {
-		err = newMethodCompiler(method, pool).Compile(w)
+		err = newMethodCompiler(method, pool).Write(w)
 		if err != nil {
 			return err
 		}

@@ -2,12 +2,12 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
 type packageVisitor struct {
-	Package  structure.Package
+	Package  intermediate.Package
 	callback visitedCallback
 }
 
@@ -28,7 +28,9 @@ func (p *packageVisitor) Visit(node ast.Node) ast.Visitor {
 
 	visitor := fileVisitor{}
 	visitor.OnComplete(func(visitor astVisitor) ast.Visitor {
-		p.Package.AddDeclarationsContext(visitor.(*fileVisitor).DeclarationContext)
+		if err := p.Package.AddEncapsulation(visitor.(*fileVisitor).Encapsulated); err != nil {
+			panic(err)
+		}
 		return p
 	})
 

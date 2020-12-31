@@ -2,7 +2,7 @@ package visitors
 
 import (
 	"fmt"
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go/ast"
 )
 
@@ -22,7 +22,7 @@ func runCallback(visitor astVisitor, callback visitedCallback) ast.Visitor {
 }
 
 type Visitor struct {
-	Parsed structure.Parsed
+	Parsed intermediate.Parsed
 }
 
 func (v *Visitor) Visit(node ast.Node) (w ast.Visitor) {
@@ -30,12 +30,13 @@ func (v *Visitor) Visit(node ast.Node) (w ast.Visitor) {
 		return v
 	}
 
-	_, ok := node.(*ast.Package)
+	pkgNode, ok := node.(*ast.Package)
 	if !ok {
 		panic(fmt.Errorf("unexpected node given to root visitor: %#v", node))
 	}
 
 	visitor := packageVisitor{}
+	visitor.Package.Name = pkgNode.Name
 	visitor.OnComplete(func(visitor astVisitor) ast.Visitor {
 		v.Parsed.AddPackage(visitor.(*packageVisitor).Package)
 		return v

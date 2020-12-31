@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"go-on-jvm/parser/structure"
+	"go-on-jvm/intermediate"
 	"go-on-jvm/parser/visitors"
 	"go/ast"
 	"go/parser"
@@ -16,19 +16,35 @@ func New() *Parser {
 	return &Parser{token.NewFileSet()}
 }
 
-func ParseDirectory(path string) (structure.Parsed, error) {
+func ParseDirectory(path string) (p intermediate.Parsed, err error) {
 	fileSet := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fileSet, path, nil, parser.AllErrors)
 
 	if err != nil {
-		return structure.Parsed{}, err
+		return
 	}
 
-	visitor := visitors.New()
+	defer func() {
+		r := recover()
 
+		if r == nil {
+			return
+		}
+
+		recoveredErr, ok := r.(error)
+
+		if ok {
+			err = recoveredErr
+		} else {
+			panic(r)
+		}
+	}()
+
+	visitor := visitors.New()
 	for _, a := range pkgs {
 		ast.Walk(visitor, a)
 	}
+	p = visitor.Parsed
 
-	return visitor.Parsed, nil
+	return
 }
