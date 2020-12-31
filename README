@@ -1,0 +1,1 @@
+Basic Go compiler with the JVM as the target platform. End goal is to be able to self host the compiler (written in go) on the JVM.
