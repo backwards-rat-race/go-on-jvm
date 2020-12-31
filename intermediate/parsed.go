@@ -1,6 +1,13 @@
 package intermediate
 
-import "fmt"
+import (
+	"fmt"
+	"unicode"
+)
+
+func isPublicName(name string) bool {
+	return len(name) > 0 && unicode.IsUpper(rune(name[0]))
+}
 
 type Parsed struct {
 	Packages []Package
@@ -10,9 +17,25 @@ func (p *Parsed) AddPackage(pkg Package) {
 	p.Packages = append(p.Packages, pkg)
 }
 
+func (p *Parsed) Classes() []Class {
+	var classes []Class
+	for _, pkg := range p.Packages {
+		classes = append(classes, pkg.Classes()...)
+	}
+	return classes
+}
+
 type Package struct {
 	Name           string
 	Encapsulations []Encapsulated
+}
+
+func (p *Package) Classes() []Class {
+	var classes []Class
+	for _, encapsulation := range p.Encapsulations {
+		classes = append(encapsulation.Classes, classes...)
+	}
+	return classes
 }
 
 func (p *Package) AddEncapsulation(encapsulated Encapsulated) error {
@@ -71,8 +94,17 @@ type Field struct {
 	TypeOnly bool
 }
 
+func (f Field) IsPublic() bool {
+	return isPublicName(f.Name)
+}
+
 type Class struct {
+	Name   string
 	Fields []Field
+}
+
+func (c Class) IsPublic() bool {
+	return isPublicName(c.Name)
 }
 
 func (c *Class) AddFields(fields []Field) {

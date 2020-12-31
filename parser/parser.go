@@ -24,6 +24,8 @@ func ParseDirectory(path string) (p intermediate.Parsed, err error) {
 		return
 	}
 
+	// Due to usage of visitor pattern. Encountered errors are panic-ed and recovered here
+
 	defer func() {
 		r := recover()
 

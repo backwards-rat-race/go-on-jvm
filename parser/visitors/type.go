@@ -9,6 +9,7 @@ import (
 type visitedStructCallback func(class intermediate.Class)
 
 type typeVisitor struct {
+	Name           string
 	callback       visitedCallback
 	structCallback visitedStructCallback
 }
@@ -31,10 +32,12 @@ func (t *typeVisitor) Visit(node ast.Node) (w ast.Visitor) {
 		//fmt.Printf("Type: TypeSpec Node '%s' %#v\n", node.Name, node)
 
 	case *ast.Ident:
-		//fmt.Printf("Type: Ident Node %#v\n", node)
+		t.Name = node.Name
 
 	case *ast.StructType:
+		fmt.Printf("Type: Struct Node %#v\n", node)
 		visitor := structVisitor{}
+		visitor.Class.Name = t.Name
 		visitor.OnComplete(func(visitor astVisitor) ast.Visitor {
 			if t.structCallback != nil {
 				t.structCallback(visitor.(*structVisitor).Class)

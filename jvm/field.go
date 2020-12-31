@@ -16,6 +16,10 @@ func NewField(name string, typeDescriptor string, access ...AccessModifier) Fiel
 	return Field{name, access, typeDescriptor}
 }
 
+func (f *Field) WithAccess(modifier ...AccessModifier) {
+	f.Access = modifier
+}
+
 func (f Field) fillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddUTF8(f.Name)
 	pool.AddUTF8(f.Type)

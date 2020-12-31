@@ -15,8 +15,8 @@ type Class struct {
 	Methods    []Method
 }
 
-func NewClass(name string, super string) *Class {
-	return &Class{Name: name, Super: super}
+func NewClass(name string, super string) Class {
+	return Class{Name: name, Super: super}
 }
 
 func (c *Class) WithAccess(modifier ...AccessModifier) {
