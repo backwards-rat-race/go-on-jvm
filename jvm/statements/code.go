@@ -1,4 +1,4 @@
-package jvm
+package statements
 
 import (
 	"bytes"
@@ -12,13 +12,13 @@ type codeAttributeSerialiser struct {
 	pool  *constantpool.ConstantPool
 }
 
-func newCodeAttributeSerialiser(stack Stack, pool *constantpool.ConstantPool) codeAttributeSerialiser {
+func newCodeAttributeSerialiser(stack Stack, pool *constantpool.ConstantPool) jvmio.Serialisable {
 	return codeAttributeSerialiser{stack, pool}
 }
 
 func (c codeAttributeSerialiser) Write(w io.Writer) error {
 	// u2 attribute_name_index;
-	err := jvmio.WritePaddedBytes(w, c.pool.FindUTF8Item(codeAttribute), 2)
+	err := jvmio.WritePaddedBytes(w, c.pool.FindUTF8Item(CodeAttribute), 2)
 	if err != nil {
 		return err
 	}

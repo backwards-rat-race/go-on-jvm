@@ -1,30 +1,17 @@
-package jvm
+package definitions
 
 import (
 	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
+	"go-on-jvm/jvm/statements"
 	"io"
 )
-
-type MethodReference struct {
-	Class string
-	Name  string
-	Type  string
-}
-
-func NewMethodReference(class string, name string, returnType string, args ...string) MethodReference {
-	return MethodReference{
-		Class: class,
-		Name:  name,
-		Type:  buildMethodTypeDescriptor(returnType, args...),
-	}
-}
 
 type Method struct {
 	Name   string
 	Type   string
 	Access []AccessModifier
-	Stack  Stack
+	Stack  statements.Stack
 }
 
 func NewMethod(name string, access ...AccessModifier) Method {
@@ -38,11 +25,11 @@ func (m *Method) WithTypeDescriptor(returnType string, argTypes ...string) {
 	m.Type = buildMethodTypeDescriptor(returnType, argTypes...)
 }
 
-func (m *Method) AddStatement(statement Statement) {
+func (m *Method) AddStatement(statement statements.Statement) {
 	m.Stack.Statements = append(m.Stack.Statements, statement)
 }
 
-func (m *Method) SetStatements(statement ...Statement) {
+func (m *Method) SetStatements(statement ...statements.Statement) {
 	m.Stack.Statements = statement
 }
 
@@ -50,7 +37,7 @@ func (m Method) fillConstantsPool(pool *constantpool.ConstantPool) {
 
 	pool.AddUTF8(m.Name)
 	pool.AddUTF8(m.Type)
-	m.Stack.fillConstantsPool(pool)
+	m.Stack.FillConstantsPool(pool)
 }
 
 type methodSerialiser struct {
@@ -96,7 +83,7 @@ func (m methodSerialiser) Write(w io.Writer) error {
 		}
 
 		// attribute_info attributes[attributes_count];
-		err = newCodeAttributeSerialiser(m.Stack, m.Pool).Write(w)
+		err = m.Stack.NewCodeAttributeSerialiser(m.Pool).Write(w)
 		if err != nil {
 			return err
 		}

@@ -1,12 +1,19 @@
-package jvm
+package statements
 
-import "go-on-jvm/jvm/constantpool"
+import (
+	"go-on-jvm/jvm/constantpool"
+	jvmio "go-on-jvm/jvm/io"
+)
 
-const codeAttribute = "Code"
+const CodeAttribute = "Code"
 
 type Stack struct {
 	Arguments  []Variable
 	Statements []Statement
+}
+
+func (s Stack) NewCodeAttributeSerialiser(pool *constantpool.ConstantPool) jvmio.Serialisable {
+	return newCodeAttributeSerialiser(s, pool)
 }
 
 func (s Stack) Empty() bool {
@@ -74,12 +81,12 @@ func (s Stack) MaxLocals() int {
 	return 0
 }
 
-func (s Stack) fillConstantsPool(pool *constantpool.ConstantPool) {
+func (s Stack) FillConstantsPool(pool *constantpool.ConstantPool) {
 	if s.Empty() {
 		return
 	}
 
-	pool.AddUTF8(codeAttribute)
+	pool.AddUTF8(CodeAttribute)
 
 	for _, statement := range s.Statements {
 		statement.fillConstantsPool(pool)

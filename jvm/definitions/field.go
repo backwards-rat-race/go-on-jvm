@@ -1,4 +1,4 @@
-package jvm
+package definitions
 
 import (
 	"go-on-jvm/jvm/constantpool"

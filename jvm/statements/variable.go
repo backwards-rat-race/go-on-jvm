@@ -1,4 +1,4 @@
-package jvm
+package statements
 
 type Variable struct {
 	Object string

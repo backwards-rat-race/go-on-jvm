@@ -3,11 +3,12 @@ package compiler
 import (
 	"go-on-jvm/intermediate"
 	"go-on-jvm/jvm"
+	definitions "go-on-jvm/jvm/definitions"
 )
 
 type CompiledClass struct {
 	Path  string
-	Class jvm.Class
+	Class definitions.Class
 }
 
 func Compile(parsed intermediate.Parsed) []CompiledClass {
@@ -24,12 +25,12 @@ func CompilePackage(pkg intermediate.Package) []CompiledClass {
 	var compiledClasses []CompiledClass
 
 	for _, class := range pkg.Classes() {
-		jvmClass := jvm.NewClass(class.Name, jvm.ObjectClass)
+		jvmClass := definitions.NewClass(class.Name, jvm.ObjectClass)
 
 		if class.IsPublic() {
-			jvmClass.WithAccess(jvm.Super, jvm.Public)
+			jvmClass.WithAccess(definitions.Super, definitions.Public)
 		} else {
-			jvmClass.WithAccess(jvm.Super)
+			jvmClass.WithAccess(definitions.Super)
 		}
 
 		compileFields(&jvmClass, class.Fields)
@@ -45,7 +46,7 @@ func CompilePackage(pkg intermediate.Package) []CompiledClass {
 	return compiledClasses
 }
 
-func compileFields(class *jvm.Class, fields []intermediate.Field) {
+func compileFields(class *definitions.Class, fields []intermediate.Field) {
 	for _, field := range fields {
 
 		var jvmType string
@@ -58,12 +59,12 @@ func compileFields(class *jvm.Class, fields []intermediate.Field) {
 			jvmType = jvm.ObjectClass
 		}
 
-		jvmField := jvm.NewField(field.Name, jvmType)
+		jvmField := definitions.NewField(field.Name, jvmType)
 
 		if field.IsPublic() {
-			jvmField.WithAccess(jvm.Super, jvm.Public)
+			jvmField.WithAccess(definitions.Super, definitions.Public)
 		} else {
-			jvmField.WithAccess(jvm.Super)
+			jvmField.WithAccess(definitions.Super)
 		}
 
 		class.AddField(jvmField)

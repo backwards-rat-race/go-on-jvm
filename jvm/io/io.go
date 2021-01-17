@@ -2,6 +2,10 @@ package io
 
 import "io"
 
+type Serialisable interface {
+	Write(w io.Writer) error
+}
+
 func ToPaddedBytes(seq int, bytes int) []byte {
 	buf := make([]byte, bytes)
 	for i := len(buf) - 1; seq != 0; i-- {

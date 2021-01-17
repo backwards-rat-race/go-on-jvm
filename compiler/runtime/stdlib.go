@@ -2,26 +2,36 @@ package runtime
 
 import (
 	"go-on-jvm/jvm"
+	"go-on-jvm/jvm/definitions"
+	"go-on-jvm/jvm/statements"
 )
 
 const StandardLibraryClassName = "StandardLibrary"
+const AppendMethod = "append"
 
-func NewStandardLib() jvm.Class {
-	class := jvm.NewClass(StandardLibraryClassName, jvm.ObjectClass)
+func NewStandardLib() definitions.Class {
+	class := definitions.NewClass(StandardLibraryClassName, jvm.ObjectClass)
 	class.AddMethod(constructor())
+	class.AddMethod(append())
 	return class
 }
 
-func constructor() jvm.Method {
-	constructor := jvm.NewMethod(jvm.ConstructorName, jvm.Private)
+func constructor() definitions.Method {
+	constructor := definitions.NewMethod(jvm.ConstructorName, definitions.Private)
 	constructor.WithTypeDescriptor(jvm.Void)
 
-	superCall := jvm.NewInvocationStatement(
-		jvm.NewMethodReference(jvm.ObjectClass, jvm.ConstructorName, jvm.Void),
-		jvm.SelfReferenceVariable,
+	superCall := statements.NewInvocation(
+		statements.NewMethodReference(jvm.ObjectClass, jvm.ConstructorName, jvm.Void),
+		statements.SelfReferenceVariable,
 	)
 	constructor.AddStatement(superCall)
-	constructor.AddStatement(jvm.NewReturnStatement())
+	constructor.AddStatement(statements.ReturnVoid)
 
 	return constructor
+}
+
+func append() definitions.Method {
+	append := definitions.NewMethod(AppendMethod, definitions.Public, definitions.Static)
+
+	return append
 }
