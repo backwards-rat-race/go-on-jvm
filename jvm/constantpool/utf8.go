@@ -15,7 +15,7 @@ func (u Utf8Item) isTag(tag ConstantPoolTag) bool {
 	return tag == Utf8
 }
 
-func (u Utf8Item) write(w io.Writer, _ int) error {
+func (u Utf8Item) write(w io.Writer, _ ConstantPool, _ int) error {
 	err := Utf8.write(w)
 	if err != nil {
 		return err

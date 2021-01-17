@@ -40,6 +40,7 @@ const (
 )
 
 const ObjectClass = "java/lang/Object"
+const ConstructorName = "<init>"
 
 type Serialisable interface {
 	Write(w io.Writer) error

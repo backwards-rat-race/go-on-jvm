@@ -38,7 +38,7 @@ func (c ConstantPoolTag) write(w io.Writer) error {
 
 type constantPoolItem interface {
 	isTag(tag ConstantPoolTag) bool
-	write(w io.Writer, index int) error
+	write(w io.Writer, constantPool ConstantPool, index int) error
 }
 
 // Pool
@@ -49,7 +49,7 @@ type ConstantPool struct {
 
 func (c ConstantPool) Write(w io.Writer) error {
 	for i, item := range c.Items {
-		err := item.write(w, i)
+		err := item.write(w, c, i)
 		if err != nil {
 			return err
 		}
@@ -59,24 +59,32 @@ func (c ConstantPool) Write(w io.Writer) error {
 }
 
 func (c *ConstantPool) FindClassNameItem(name string) int {
-	isClassName := false
-
-	for i, item := range c.Items {
-		if isClassName && isUtf8(item, name) {
-			// We want the index of the class specifier, rather than the UTF8
-			return i - 1
-		}
-
-		// If we're a class constant, then the next constant should be the class name
-		isClassName = item.isTag(ClassReference)
-	}
-
-	return 0
+	return c.findItem(func(item constantPoolItem) bool {
+		return isClass(item, name)
+	})
 }
 
 func (c *ConstantPool) FindUTF8Item(value string) int {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isUtf8(item, value)
+	})
+}
+
+func (c *ConstantPool) FindMethodReference(class string, name string, typeDescriptor string) int {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isMethodReference(item, class, name, typeDescriptor)
+	})
+}
+
+func (c *ConstantPool) FindNameAndType(name string, typeDescriptor string) int {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isNameAndType(item, name, typeDescriptor)
+	})
+}
+
+func (c *ConstantPool) findItem(predicate func(item constantPoolItem) bool) int {
 	for i, item := range c.Items {
-		if isUtf8(item, value) {
+		if predicate(item) {
 			return i
 		}
 	}
@@ -89,8 +97,8 @@ func (c *ConstantPool) AddClassReference(name string) {
 		return
 	}
 
-	c.addItem(newClassConstant())
-	c.addItem(newUtf8Constant(name))
+	c.addItem(newClassConstant(name))
+	c.AddUTF8(name)
 }
 
 func (c *ConstantPool) AddUTF8(value string) {
@@ -100,29 +108,41 @@ func (c *ConstantPool) AddUTF8(value string) {
 	c.addItem(newUtf8Constant(value))
 }
 
+func (c *ConstantPool) AddMethodReference(class string, name string, typeDescriptor string) {
+	if c.FindMethodReference(class, name, typeDescriptor) > 0 {
+		return
+	}
+	c.addItem(newMethodReference(class, name, typeDescriptor))
+	c.AddClassReference(class)
+	c.AddNameAndType(name, typeDescriptor)
+}
+
+func (c *ConstantPool) AddNameAndType(name string, typeDescriptor string) {
+	if c.FindNameAndType(name, typeDescriptor) > 0 {
+		return
+	}
+	c.addItem(newNameAndType(name, typeDescriptor))
+	c.AddUTF8(name)
+	c.AddUTF8(typeDescriptor)
+}
+
 func (c *ConstantPool) addItem(item constantPoolItem) {
 	c.Items = append(c.Items, item)
 }
 
 func New() *ConstantPool {
 	c := &ConstantPool{}
-	c.addItem(newPoolSize(c))
+	c.addItem(poolSize{})
 	return c
 }
 
 // Pool Size
-type poolSize struct {
-	constantPool *ConstantPool
-}
+type poolSize struct{}
 
-func (p *poolSize) isTag(_ ConstantPoolTag) bool {
+func (p poolSize) isTag(_ ConstantPoolTag) bool {
 	return false
 }
 
-func (p *poolSize) write(w io.Writer, _ int) error {
-	return jvmio.WritePaddedBytes(w, len(p.constantPool.Items), 2)
-}
-
-func newPoolSize(c *ConstantPool) *poolSize {
-	return &poolSize{c}
+func (p poolSize) write(w io.Writer, constantPool ConstantPool, _ int) error {
+	return jvmio.WritePaddedBytes(w, len(constantPool.Items), 2)
 }

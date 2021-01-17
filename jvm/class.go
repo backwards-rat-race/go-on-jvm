@@ -127,7 +127,7 @@ func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
 	}
 
 	for _, field := range c.Fields {
-		err = newFieldCompiler(field, pool).Write(w)
+		err = newFieldSerialiser(field, pool).Write(w)
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func (c Class) writeMethods(w io.Writer, pool *constantpool.ConstantPool) error 
 	}
 
 	for _, method := range c.Methods {
-		err = newMethodCompiler(method, pool).Write(w)
+		err = newMethodSerialiser(method, pool).Write(w)
 		if err != nil {
 			return err
 		}

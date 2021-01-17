@@ -25,16 +25,16 @@ func (f Field) fillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddUTF8(f.Type)
 }
 
-type fieldCompiler struct {
+type fieldSerialiser struct {
 	Field
 	Pool *constantpool.ConstantPool
 }
 
-func newFieldCompiler(field Field, pool *constantpool.ConstantPool) *fieldCompiler {
-	return &fieldCompiler{field, pool}
+func newFieldSerialiser(field Field, pool *constantpool.ConstantPool) *fieldSerialiser {
+	return &fieldSerialiser{field, pool}
 }
 
-func (f *fieldCompiler) Write(w io.Writer) error {
+func (f *fieldSerialiser) Write(w io.Writer) error {
 	err := writeAccessModifier(w, f.Access)
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-on-jvm/compiler"
+	"go-on-jvm/compiler/runtime"
 	"go-on-jvm/parser"
 	os "os"
 )
@@ -28,6 +29,11 @@ func main() {
 	for _, class := range classes {
 		write(class)
 	}
+
+	write(compiler.CompiledClass{
+		Path:  "StandardLibrary",
+		Class: runtime.NewStandardLib(),
+	})
 }
 
 func write(class compiler.CompiledClass) {
