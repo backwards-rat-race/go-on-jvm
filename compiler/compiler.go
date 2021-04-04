@@ -2,8 +2,8 @@ package compiler
 
 import (
 	"go-on-jvm/intermediate"
-	"go-on-jvm/jvm"
 	definitions "go-on-jvm/jvm/definitions"
+	"go-on-jvm/jvm/types"
 )
 
 type CompiledClass struct {
@@ -25,7 +25,7 @@ func CompilePackage(pkg intermediate.Package) []CompiledClass {
 	var compiledClasses []CompiledClass
 
 	for _, class := range pkg.Classes() {
-		jvmClass := definitions.NewClass(class.Name, jvm.ObjectClass)
+		jvmClass := definitions.NewClass(class.Name, types.ObjectClass)
 
 		if class.IsPublic() {
 			jvmClass.WithAccess(definitions.Super, definitions.Public)
@@ -49,14 +49,14 @@ func CompilePackage(pkg intermediate.Package) []CompiledClass {
 func compileFields(class *definitions.Class, fields []intermediate.Field) {
 	for _, field := range fields {
 
-		var jvmType string
+		var jvmType types.TypeReference
 
 		switch field.Type {
 		case "int":
-			jvmType = jvm.Int
+			jvmType = types.Int
 
 		default:
-			jvmType = jvm.ObjectClass
+			jvmType = types.ObjectClass
 		}
 
 		jvmField := definitions.NewField(field.Name, jvmType)

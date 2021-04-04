@@ -4,37 +4,46 @@ import (
 	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
 	"go-on-jvm/jvm/opcodes"
-	"io"
+	jvmtypes "go-on-jvm/jvm/types"
 )
 
 type MethodReference struct {
-	Class string
+	Class jvmtypes.TypeReference
 	Name  string
-	Type  string
+	Type  jvmtypes.MethodType
 }
 
-func NewMethodReference(class string, name string, returnType string, args ...string) MethodReference {
+type MethodType struct {
+	Arguments []string
+	Return    string
+}
+
+func NewMethodReference(class jvmtypes.TypeReference, name string, returnType jvmtypes.TypeReference, args ...jvmtypes.TypeReference) MethodReference {
 	return MethodReference{
 		Class: class,
 		Name:  name,
-		//Type:  buildMethodTypeDescriptor(returnType, args...),
+		Type:  jvmtypes.MethodType{ReturnType: returnType, Arguments: args},
 	}
+}
+
+func (m MethodReference) IsVoid() bool {
+	return m.Type.ReturnType == jvmtypes.Void
 }
 
 type Invocation struct {
 	MethodReference MethodReference
 	Static          bool
-	Vars            []Variable
+	Vars            []Statement
 }
 
-func NewInvocation(method MethodReference, vars ...Variable) Invocation {
+func NewInvocation(method MethodReference, vars ...Statement) Invocation {
 	return Invocation{
 		MethodReference: method,
 		Vars:            vars,
 	}
 }
 
-func NewStaticInvocation(method MethodReference, vars ...Variable) Invocation {
+func NewStaticInvocation(method MethodReference, vars ...Statement) Invocation {
 	return Invocation{
 		MethodReference: method,
 		Static:          true,
@@ -42,53 +51,24 @@ func NewStaticInvocation(method MethodReference, vars ...Variable) Invocation {
 	}
 }
 
-func (i Invocation) NewSerialiser(stack Stack, pool *constantpool.ConstantPool) jvmio.Serialisable {
-	return newInvocationStatementSerialiser(i, stack, pool)
-}
+func (i Invocation) GetInstructions(index int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := make([]byte, 0)
 
-func (i Invocation) Variables() []Variable {
-	return i.Vars
-}
-
-func (i Invocation) fillConstantsPool(pool *constantpool.ConstantPool) {
-	pool.AddMethodReference(i.MethodReference.Class, i.MethodReference.Name, i.MethodReference.Type)
-}
-
-type invocationStatementSerialiser struct {
-	Invocation
-	Stack Stack
-	Pool  *constantpool.ConstantPool
-}
-
-func newInvocationStatementSerialiser(statement Invocation, stack Stack, pool *constantpool.ConstantPool) *invocationStatementSerialiser {
-	return &invocationStatementSerialiser{statement, stack, pool}
-}
-
-func (i invocationStatementSerialiser) Write(w io.Writer) error {
-	for _, variable := range i.Variables() {
-		index := i.Stack.Index(variable)
-		op := opcodes.NewALoad(index)
-		err := jvmio.WritePaddedBytes(w, op, 1)
-		if err != nil {
-			return err
-		}
+	for _, variable := range i.Vars {
+		instructions = append(instructions, variable.GetInstructions(index, stack, pool)...)
 	}
 
-	err := jvmio.WritePaddedBytes(w, i.opcode(), 1)
-	if err != nil {
-		return err
-	}
+	instructions = jvmio.AppendPaddedBytes(instructions, i.opcode(), 1)
 
-	index := i.Pool.FindMethodReference(i.MethodReference.Class, i.MethodReference.Name, i.MethodReference.Type)
-	err = jvmio.WritePaddedBytes(w, index, 2)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	constantIndex := pool.FindMethodReference(i.MethodReference.Class.Jvm(), i.MethodReference.Name, i.MethodReference.Type.Descriptor())
+	return jvmio.AppendPaddedBytes(instructions, constantIndex, 2)
 }
 
-func (i invocationStatementSerialiser) opcode() int {
+func (i Invocation) FillConstantsPool(pool *constantpool.ConstantPool) {
+	pool.AddMethodReference(i.MethodReference.Class.Jvm(), i.MethodReference.Name, i.MethodReference.Type.Descriptor())
+}
+
+func (i Invocation) opcode() int {
 	if i.Static {
 		return opcodes.INVOKESTATIC
 	} else {

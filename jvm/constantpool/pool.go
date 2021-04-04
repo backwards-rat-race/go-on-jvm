@@ -82,6 +82,12 @@ func (c *ConstantPool) FindNameAndType(name string, typeDescriptor string) int {
 	})
 }
 
+func (c *ConstantPool) FindIntConstant(constant int) int {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isInt(item, constant)
+	})
+}
+
 func (c *ConstantPool) findItem(predicate func(item constantPoolItem) bool) int {
 	for i, item := range c.Items {
 		if predicate(item) {
@@ -124,6 +130,13 @@ func (c *ConstantPool) AddNameAndType(name string, typeDescriptor string) {
 	c.addItem(newNameAndType(name, typeDescriptor))
 	c.AddUTF8(name)
 	c.AddUTF8(typeDescriptor)
+}
+
+func (c *ConstantPool) AddIntConstant(constant int) {
+	if c.FindIntConstant(constant) > 0 {
+		return
+	}
+	c.addItem(newIntConstant(constant))
 }
 
 func (c *ConstantPool) addItem(item constantPoolItem) {

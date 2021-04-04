@@ -5,7 +5,7 @@ import (
 	"go-on-jvm/compiler"
 	"go-on-jvm/compiler/runtime"
 	"go-on-jvm/parser"
-	os "os"
+	"os"
 )
 
 func main() {

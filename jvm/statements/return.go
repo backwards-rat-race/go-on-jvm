@@ -5,7 +5,6 @@ import (
 	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
 	"go-on-jvm/jvm/opcodes"
-	"io"
 )
 
 type ReturnType int
@@ -19,31 +18,8 @@ const (
 	ReturnDouble
 )
 
-func (r ReturnType) NewSerialiser(_ Stack, _ *constantpool.ConstantPool) jvmio.Serialisable {
-	return newReturnSerialiser(r)
-}
-
-func (r ReturnType) Variables() []Variable {
-	return nil
-}
-
-func (r ReturnType) fillConstantsPool(_ *constantpool.ConstantPool) {
-}
-
-type returnTypeSerialiser struct {
-	ReturnType
-}
-
-func newReturnSerialiser(returnType ReturnType) *returnTypeSerialiser {
-	return &returnTypeSerialiser{returnType}
-}
-
-func (r returnTypeSerialiser) Write(w io.Writer) error {
-	return jvmio.WritePaddedBytes(w, r.opcode(), 1)
-}
-
-func (r returnTypeSerialiser) opcode() int {
-	switch r.ReturnType {
+func (r ReturnType) opcode() int {
+	switch r {
 	case ReturnVoid:
 		return opcodes.RETURN
 	case ReturnReference:
@@ -57,6 +33,37 @@ func (r returnTypeSerialiser) opcode() int {
 	case ReturnDouble:
 		return opcodes.DRETURN
 	default:
-		panic(fmt.Errorf("unknown return type: %d", r.ReturnType))
+		panic(fmt.Errorf("unknown return type: %d", r))
 	}
+}
+
+type Return struct {
+	Type      ReturnType
+	Statement Statement
+}
+
+func (r Return) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+	var instructions []byte
+
+	if r.Type == ReturnVoid {
+		instructions = make([]byte, 0)
+	} else {
+		instructions = r.Statement.GetInstructions(writeIndex, stack, pool)
+	}
+
+	return jvmio.AppendPaddedBytes(instructions, r.Type.opcode(), 1)
+}
+
+func (r Return) FillConstantsPool(pool *constantpool.ConstantPool) {
+	if r.Statement != nil {
+		r.Statement.FillConstantsPool(pool)
+	}
+}
+
+func NewVoidReturn() Return {
+	return Return{Type: ReturnVoid}
+}
+
+func NewReturn(returnType ReturnType, statement Statement) Return {
+	return Return{Type: returnType, Statement: statement}
 }

@@ -3,19 +3,20 @@ package definitions
 import (
 	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
+	jvmtypes "go-on-jvm/jvm/types"
 	"io"
 )
 
 type Class struct {
 	Name       string
 	Access     []AccessModifier
-	Super      string
+	Super      jvmtypes.TypeReference
 	Implements []string
 	Fields     []Field
 	Methods    []Method
 }
 
-func NewClass(name string, super string) Class {
+func NewClass(name string, super jvmtypes.TypeReference) Class {
 	return Class{Name: name, Super: super}
 }
 
@@ -90,7 +91,7 @@ func (c Class) writeVersion(w io.Writer) error {
 
 func (c Class) fillConstantPool(pool *constantpool.ConstantPool) {
 	pool.AddClassReference(c.Name)
-	pool.AddClassReference(c.Super)
+	pool.AddClassReference(c.Super.Jvm())
 
 	for _, field := range c.Fields {
 		field.fillConstantsPool(pool)
@@ -107,7 +108,7 @@ func (c Class) writeClassSpecifier(w io.Writer, pool *constantpool.ConstantPool)
 		return err
 	}
 
-	err = jvmio.WritePaddedBytes(w, pool.FindClassNameItem(c.Super), 2)
+	err = jvmio.WritePaddedBytes(w, pool.FindClassNameItem(c.Super.Jvm()), 2)
 	if err != nil {
 		return err
 	}

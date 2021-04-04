@@ -3,16 +3,17 @@ package definitions
 import (
 	"go-on-jvm/jvm/constantpool"
 	jvmio "go-on-jvm/jvm/io"
+	jvmtypes "go-on-jvm/jvm/types"
 	"io"
 )
 
 type Field struct {
 	Name   string
 	Access []AccessModifier
-	Type   string
+	Type   jvmtypes.TypeReference
 }
 
-func NewField(name string, typeDescriptor string, access ...AccessModifier) Field {
+func NewField(name string, typeDescriptor jvmtypes.TypeReference, access ...AccessModifier) Field {
 	return Field{name, access, typeDescriptor}
 }
 
@@ -22,7 +23,7 @@ func (f *Field) WithAccess(modifier ...AccessModifier) {
 
 func (f Field) fillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddUTF8(f.Name)
-	pool.AddUTF8(f.Type)
+	pool.AddUTF8(f.Type.Jvm())
 }
 
 type fieldSerialiser struct {
@@ -45,7 +46,7 @@ func (f *fieldSerialiser) Write(w io.Writer) error {
 		return err
 	}
 
-	err = jvmio.WritePaddedBytes(w, f.Pool.FindUTF8Item(f.Type), 2)
+	err = jvmio.WritePaddedBytes(w, f.Pool.FindUTF8Item(f.Type.Jvm()), 2)
 	if err != nil {
 		return err
 	}

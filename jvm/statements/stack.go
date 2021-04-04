@@ -1,27 +1,18 @@
 package statements
 
-import (
-	"go-on-jvm/jvm/constantpool"
-	jvmio "go-on-jvm/jvm/io"
-)
-
-const CodeAttribute = "Code"
-
 type Stack struct {
-	Arguments  []Variable
-	Statements []Statement
+	Locals      []Variable
+	CurrentSize int
+
+	maxSize int
 }
 
-func (s Stack) NewCodeAttributeSerialiser(pool *constantpool.ConstantPool) jvmio.Serialisable {
-	return newCodeAttributeSerialiser(s, pool)
+func NewStack(arguments ...Variable) *Stack {
+	return &Stack{arguments, 0, 0}
 }
 
-func (s Stack) Empty() bool {
-	return len(s.Statements) == 0
-}
-
-func (s Stack) Index(variable Variable) int {
-	for i, v := range s.Variables() {
+func (s Stack) Load(variable Variable) int {
+	for i, v := range s.Locals {
 		if v == variable {
 			return i
 		}
@@ -29,66 +20,31 @@ func (s Stack) Index(variable Variable) int {
 	return -1
 }
 
-func (s Stack) Variables() []Variable {
-	variables := make([]Variable, len(s.Arguments))
-	m := make(map[Variable]bool)
-
-	for i, argument := range s.Arguments {
-		m[argument] = true
-		variables[i] = argument
+func (s *Stack) Store(variable Variable) int {
+	index := s.Load(variable)
+	if index > -1 {
+		return index
 	}
+	index = len(s.Locals)
+	s.Locals = append(s.Locals, variable)
+	return index
+}
 
-	var index int
+func (s *Stack) Pop() {
+	s.CurrentSize -= 1
+}
 
-	for _, statement := range s.Statements {
-		for _, v := range statement.Variables() {
-			if m[v] {
-				continue
-			}
-
-			index++
-			m[v] = true
-			variables = append(variables, v)
-		}
+func (s *Stack) Push() {
+	s.CurrentSize += 1
+	if s.CurrentSize > s.maxSize {
+		s.maxSize = s.CurrentSize
 	}
-
-	return variables
 }
 
 func (s Stack) MaxSize() int {
-	max := len(s.Arguments)
-
-	for _, statement := range s.Statements {
-		stackSize := len(statement.Variables())
-
-		if stackSize > max {
-			max = stackSize
-		}
-	}
-
-	return max
+	return s.maxSize
 }
 
 func (s Stack) MaxLocals() int {
-	locals := 0
-
-	for _, variable := range s.Variables() {
-		if variable.IsLocal() {
-			locals++
-		}
-	}
-
-	return 0
-}
-
-func (s Stack) FillConstantsPool(pool *constantpool.ConstantPool) {
-	if s.Empty() {
-		return
-	}
-
-	pool.AddUTF8(CodeAttribute)
-
-	for _, statement := range s.Statements {
-		statement.fillConstantsPool(pool)
-	}
+	return len(s.Locals)
 }
