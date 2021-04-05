@@ -132,18 +132,18 @@ func appendMethod() definitions.Method {
 }
 
 func joinMethod() definitions.Method {
+	stringClass := types.MustParse("java.lang.String")
+
 	joinMethod := definitions.NewMethod(JoinMethod, definitions.Private, definitions.Static, definitions.VarArgs)
-	joinMethod.ReturnType = types.MustParse("java.lang.String")
+	joinMethod.ReturnType = stringClass
 	objectsArg := statements.NewLocalVariable("objects", types.ObjectClass.Array())
 	joinMethod.AddArgument(objectsArg)
 
 	stringJoinerClass := types.MustParse("java.util.StringJoiner")
+	stringJoiner := statements.NewLocalVariable("sj", stringJoinerClass)
 	joinMethod.AddStatement(
 		statements.NewVariableSet(
-			statements.NewLocalVariable(
-				"sj",
-				stringJoinerClass,
-			),
+			stringJoiner,
 			statements.NewInitInvocation(
 				stringJoinerClass,
 				statements.NewStringConstant(" "),
@@ -153,6 +153,59 @@ func joinMethod() definitions.Method {
 
 	forIndex := statements.NewLocalVariable("i", types.Int)
 	forBlock := statements.NewBlock()
+
+	ifEntryIsNull := statements.NewIf(
+		statements.IsNull.New(
+			statements.NewArrayGet(
+				statements.NewVariableGet(objectsArg),
+				statements.NewVariableGet(forIndex),
+			),
+		),
+	)
+	ifEntryIsNull.Success.AddStatement(
+		statements.NewThrowAway(
+			statements.NewInvocation(
+				statements.NewMethodReference(
+					stringJoinerClass,
+					"add",
+					stringJoinerClass,
+					stringClass,
+				),
+				statements.NewVariableGet(
+					stringJoiner,
+				),
+				statements.NewStringConstant("0x00"),
+			),
+		),
+	)
+	ifEntryIsNull.Failure.AddStatement(
+		statements.NewThrowAway(
+			statements.NewInvocation(
+				statements.NewMethodReference(
+					stringJoinerClass,
+					"add",
+					stringJoinerClass,
+					stringClass,
+				),
+				statements.NewVariableGet(
+					stringJoiner,
+				),
+				statements.NewInvocation(
+					statements.NewMethodReference(
+						types.ObjectClass.Array(),
+						"toString",
+						stringJoinerClass,
+					),
+					statements.NewArrayGet(
+						statements.NewVariableGet(objectsArg),
+						statements.NewVariableGet(objectsArg),
+					),
+				),
+			),
+		),
+	)
+
+	forBlock.AddStatement(ifEntryIsNull)
 
 	joinMethod.AddStatement(
 		statements.NewForLoop(
@@ -174,6 +227,21 @@ func joinMethod() definitions.Method {
 				statements.AddInt.New(
 					statements.NewVariableGet(forIndex),
 					statements.NewIntConstant(1),
+				),
+			),
+		),
+	)
+	joinMethod.AddStatement(
+		statements.NewReturn(
+			statements.ReturnReference,
+			statements.NewInvocation(
+				statements.NewMethodReference(
+					stringJoinerClass,
+					"toString",
+					stringClass,
+				),
+				statements.NewVariableGet(
+					stringJoiner,
 				),
 			),
 		),

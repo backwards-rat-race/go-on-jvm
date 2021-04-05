@@ -45,6 +45,7 @@ func (f ForLoop) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) 
 }
 
 func (f ForLoop) FillConstantsPool(pool *constantpool.ConstantPool) {
+	f.Block.FillConstantsPool(pool)
 	if f.Declaration != nil {
 		f.Declaration.FillConstantsPool(pool)
 	}

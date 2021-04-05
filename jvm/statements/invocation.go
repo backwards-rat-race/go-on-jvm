@@ -51,6 +51,9 @@ func (i Invocation) GetInstructions(stack *Stack, pool *constantpool.ConstantPoo
 
 func (i Invocation) FillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddMethodReference(i.MethodReference.Class.Jvm(), i.MethodReference.Name, i.MethodReference.Type.Descriptor())
+	for _, statement := range i.Vars {
+		statement.FillConstantsPool(pool)
+	}
 }
 
 func (i Invocation) MaxStack() uint {
