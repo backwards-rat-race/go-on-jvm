@@ -139,9 +139,15 @@ func joinMethod() definitions.Method {
 
 	stringJoinerClass := types.MustParse("java.util.StringJoiner")
 	joinMethod.AddStatement(
-		statements.NewInitInvocation(
-			stringJoinerClass,
-			statements.NewStringConstant(" "),
+		statements.NewVariableSet(
+			statements.NewLocalVariable(
+				"sj",
+				stringJoinerClass,
+			),
+			statements.NewInitInvocation(
+				stringJoinerClass,
+				statements.NewStringConstant(" "),
+			),
 		),
 	)
 
