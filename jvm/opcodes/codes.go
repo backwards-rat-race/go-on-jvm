@@ -14,8 +14,16 @@ const (
 	LDC           = 0x12
 	ALOAD         = 0x19
 	ALOAD_0       = 0x2A
+	ALOAD_1       = 0x2B
+	ALOAD_2       = 0x2C
+	ALOAD_3       = 0x2D
+	AALOAD        = 0x32
 	ASTORE        = 0x3A
 	ASTORE_0      = 0x4B
+	ASTORE_1      = 0x4C
+	ASTORE_2      = 0x4D
+	ASTORE_3      = 0x4E
+	AASTORE       = 0x53
 	POP           = 0x57
 	POP2          = 0x58
 	DUP           = 0x59
@@ -57,18 +65,32 @@ const (
 )
 
 func GetALoadInstruction(index int) []byte {
-	if index > 3 {
+	switch index {
+	case 0:
+		return []byte{ALOAD_0}
+	case 1:
+		return []byte{ALOAD_1}
+	case 2:
+		return []byte{ALOAD_2}
+	case 3:
+		return []byte{ALOAD_3}
+	default:
 		return []byte{byte(ALOAD), byte(index)}
-	} else {
-		return []byte{byte(ALOAD_0 + index)}
 	}
 }
 
 func GetAStoreInstruction(index int) []byte {
-	if index > 3 {
+	switch index {
+	case 0:
+		return []byte{ASTORE_0}
+	case 1:
+		return []byte{ASTORE_1}
+	case 2:
+		return []byte{ASTORE_2}
+	case 3:
+		return []byte{ASTORE_3}
+	default:
 		return []byte{byte(ASTORE), byte(index)}
-	} else {
-		return []byte{byte(ASTORE_0 + index)}
 	}
 }
 
