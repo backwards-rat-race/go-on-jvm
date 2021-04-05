@@ -77,7 +77,7 @@ type If struct {
 	Failure   Block
 }
 
-func (i If) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+func (i If) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	instructions := make([]byte, 0)
 
 	if i.Success.Empty() {
@@ -86,28 +86,21 @@ func (i If) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.Con
 	}
 
 	// First load the condition onto the stack
-	instructions = append(instructions, i.Condition.GetInstructions(writeIndex, stack, pool)...)
-	writeIndex += len(instructions)
+	instructions = append(instructions, i.Condition.GetInstructions(stack, pool)...)
 
-	// We can't write it yet as we don't know where we're jumping
-	// off too, but we know it's going to be 3 bytes.
-	writeIndex += 3
+	nestedInstructions := i.Success.GetInstructions(stack, pool)
+	jumpTo := +opcodes.IfSize
 
-	nestedInstructions := i.Success.GetInstructions(writeIndex, stack, pool)
-	writeIndex += len(nestedInstructions)
-
-	if !i.Failure.Empty() {
-		// We're going to require a goto at the end of the success block. We can't write it yet
-		// as we don't know where we're jumping too. We know the size will be 3 though
-		// FIXME support goto_w which is 5 bytes?
-		writeIndex += 3
-
-		failureInstructions := i.Failure.GetInstructions(writeIndex, stack, pool)
-		writeIndex += len(failureInstructions)
+	if i.Failure.Empty() {
+		jumpTo += len(nestedInstructions)
+	} else {
+		failureInstructions := i.Failure.GetInstructions(stack, pool)
 
 		// Now we know how long the failure branch is we can add the goto instruction
-		// at the end of the success block
-		nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstruction(writeIndex)...)
+		// at the end of the success block (the instruction after failure
+		gotoJump := len(failureInstructions) + opcodes.GotoSize
+		nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstruction(gotoJump)...)
+		jumpTo += len(nestedInstructions)
 		nestedInstructions = append(nestedInstructions, failureInstructions...)
 	}
 
@@ -118,8 +111,7 @@ func (i If) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.Con
 	instructions = jvmio.AppendPaddedBytes(instructions, i.Type.Inverse().opcode(), 1)
 
 	// Where we want to jump to
-	instructions = jvmio.AppendPaddedBytes(instructions, writeIndex, 2)
-
+	instructions = jvmio.AppendPaddedBytes(instructions, jumpTo, 2)
 	instructions = append(instructions, nestedInstructions...)
 
 	return instructions
@@ -129,4 +121,8 @@ func (i If) FillConstantsPool(pool *constantpool.ConstantPool) {
 	i.Condition.FillConstantsPool(pool)
 	i.Success.FillConstantsPool(pool)
 	i.Failure.FillConstantsPool(pool)
+}
+
+func (i If) MaxStack() int {
+	return iMax(i.Failure.MaxStack(), i.Success.MaxStack())
 }

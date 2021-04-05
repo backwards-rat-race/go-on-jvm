@@ -173,10 +173,10 @@ func (c codeAttributeSerialiser) Write(w io.Writer) error {
 func (c codeAttributeSerialiser) writeAttributeData(w io.Writer) error {
 
 	stack := c.Method.CreateStack()
-	instructions := c.Method.GetInstructions(0, stack, c.pool)
+	instructions := c.Method.GetInstructions(stack, c.pool)
 
 	// u2 max_stack
-	err := jvmio.WritePaddedBytes(w, stack.MaxSize(), 2)
+	err := jvmio.WritePaddedBytes(w, c.Method.MaxStack(), 2)
 	if err != nil {
 		return err
 	}

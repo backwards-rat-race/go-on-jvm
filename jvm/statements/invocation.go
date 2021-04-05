@@ -36,26 +36,11 @@ type Invocation struct {
 	Vars            []Statement
 }
 
-func NewInvocation(method MethodReference, vars ...Statement) Invocation {
-	return Invocation{
-		MethodReference: method,
-		Vars:            vars,
-	}
-}
-
-func NewStaticInvocation(method MethodReference, vars ...Statement) Invocation {
-	return Invocation{
-		MethodReference: method,
-		Static:          true,
-		Vars:            vars,
-	}
-}
-
-func (i Invocation) GetInstructions(index int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+func (i Invocation) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	instructions := make([]byte, 0)
 
 	for _, variable := range i.Vars {
-		instructions = append(instructions, variable.GetInstructions(index, stack, pool)...)
+		instructions = append(instructions, variable.GetInstructions(stack, pool)...)
 	}
 
 	instructions = jvmio.AppendPaddedBytes(instructions, i.opcode(), 1)
@@ -68,10 +53,35 @@ func (i Invocation) FillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddMethodReference(i.MethodReference.Class.Jvm(), i.MethodReference.Name, i.MethodReference.Type.Descriptor())
 }
 
+func (i Invocation) MaxStack() int {
+	max := len(i.Vars)
+
+	for _, statement := range i.Vars {
+		max = iMax(max, statement.MaxStack())
+	}
+
+	return max
+}
+
 func (i Invocation) opcode() int {
 	if i.Static {
 		return opcodes.INVOKESTATIC
 	} else {
 		return opcodes.INVOKESPECIAL
+	}
+}
+
+func NewInvocation(method MethodReference, vars ...Statement) Invocation {
+	return Invocation{
+		MethodReference: method,
+		Vars:            vars,
+	}
+}
+
+func NewStaticInvocation(method MethodReference, vars ...Statement) Invocation {
+	return Invocation{
+		MethodReference: method,
+		Static:          true,
+		Vars:            vars,
 	}
 }

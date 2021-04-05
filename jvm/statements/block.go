@@ -10,19 +10,24 @@ type Block struct {
 	Statements []Statement
 }
 
-func (b Block) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+func (b Block) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	instructions := make([]byte, 0)
 
 	for _, statement := range b.Statements {
-		index := writeIndex + len(instructions)
-		instructions = append(instructions, statement.GetInstructions(index, stack, pool)...)
+		instructions = append(instructions, statement.GetInstructions(stack, pool)...)
 	}
 
 	return instructions
 }
 
-func NewBlock() Block {
-	return Block{}
+func (b Block) MaxStack() int {
+	max := 0
+
+	for _, statement := range b.Statements {
+		max = iMax(max, statement.MaxStack())
+	}
+
+	return max
 }
 
 func (b *Block) AddStatement(statement Statement) {
@@ -42,5 +47,17 @@ func (b Block) FillConstantsPool(pool *constantpool.ConstantPool) {
 
 	for _, statement := range b.Statements {
 		statement.FillConstantsPool(pool)
+	}
+}
+
+func NewBlock() Block {
+	return Block{}
+}
+
+func iMax(x, y int) int {
+	if x > y {
+		return x
+	} else {
+		return y
 	}
 }

@@ -102,13 +102,12 @@ func appendMethod() definitions.Method {
 			),
 			statements.NewVariableGet(additionalArg),
 			statements.NewIntConstant(0),
-			statements.AddInt.New(
-				statements.NewArrayLen(
-					statements.NewVariableGet(originalArg),
-				),
-				statements.NewArrayLen(
-					statements.NewVariableGet(additionalArg),
-				),
+			statements.NewVariableGet(createdVar),
+			statements.NewArrayLen(
+				statements.NewVariableGet(originalArg),
+			),
+			statements.NewArrayLen(
+				statements.NewVariableGet(additionalArg),
 			),
 		),
 	)

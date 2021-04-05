@@ -67,10 +67,9 @@ type Arithmetic struct {
 	Right Statement
 }
 
-func (a Arithmetic) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
-	instructions := a.Left.GetInstructions(writeIndex, stack, pool)
-	writeIndex += len(instructions)
-	instructions = a.Right.GetInstructions(writeIndex, stack, pool)
+func (a Arithmetic) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := a.Left.GetInstructions(stack, pool)
+	instructions = append(instructions, a.Right.GetInstructions(stack, pool)...)
 	instructions = jvmio.AppendPaddedBytes(instructions, a.Type.OpCode(), 1)
 	return instructions
 }
@@ -78,4 +77,8 @@ func (a Arithmetic) GetInstructions(writeIndex int, stack *Stack, pool *constant
 func (a Arithmetic) FillConstantsPool(pool *constantpool.ConstantPool) {
 	a.Left.FillConstantsPool(pool)
 	a.Right.FillConstantsPool(pool)
+}
+
+func (a Arithmetic) MaxStack() int {
+	return a.Left.MaxStack() + a.Right.MaxStack()
 }

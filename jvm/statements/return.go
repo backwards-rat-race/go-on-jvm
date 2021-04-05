@@ -42,13 +42,13 @@ type Return struct {
 	Statement Statement
 }
 
-func (r Return) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+func (r Return) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	var instructions []byte
 
 	if r.Type == ReturnVoid {
 		instructions = make([]byte, 0)
 	} else {
-		instructions = r.Statement.GetInstructions(writeIndex, stack, pool)
+		instructions = r.Statement.GetInstructions(stack, pool)
 	}
 
 	return jvmio.AppendPaddedBytes(instructions, r.Type.opcode(), 1)
@@ -58,6 +58,14 @@ func (r Return) FillConstantsPool(pool *constantpool.ConstantPool) {
 	if r.Statement != nil {
 		r.Statement.FillConstantsPool(pool)
 	}
+}
+
+func (r Return) MaxStack() int {
+	if r.Type == ReturnVoid {
+		return 0
+	}
+
+	return r.Statement.MaxStack()
 }
 
 func NewVoidReturn() Return {

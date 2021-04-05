@@ -10,7 +10,7 @@ type IntConstant struct {
 	Constant int
 }
 
-func (i IntConstant) GetInstructions(_ int, _ *Stack, pool *constantpool.ConstantPool) []byte {
+func (i IntConstant) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	var instructions []byte
 
 	switch i.Constant {
@@ -40,6 +40,10 @@ func (i IntConstant) FillConstantsPool(pool *constantpool.ConstantPool) {
 	if i.requiresPoolEntry() {
 		pool.AddIntConstant(i.Constant)
 	}
+}
+
+func (i IntConstant) MaxStack() int {
+	return 1
 }
 
 func (i IntConstant) requiresPoolEntry() bool {

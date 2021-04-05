@@ -10,14 +10,22 @@ type ArrayLen struct {
 	Array Statement
 }
 
-func (a ArrayLen) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
-	instructions := a.Array.GetInstructions(writeIndex, stack, pool)
+func (a ArrayLen) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := a.Array.GetInstructions(stack, pool)
 	instructions = jvmio.AppendPaddedBytes(instructions, opcodes.ARRAYLENGTH, 1)
 	return instructions
 }
 
 func (a ArrayLen) FillConstantsPool(pool *constantpool.ConstantPool) {
 	a.Array.FillConstantsPool(pool)
+}
+
+func (a ArrayLen) MaxStack() int {
+	if a.Array == nil {
+		return 0
+	} else {
+		return a.Array.MaxStack()
+	}
 }
 
 func NewArrayLen(array Statement) ArrayLen {

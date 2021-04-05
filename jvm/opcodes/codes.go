@@ -12,7 +12,9 @@ const (
 	ICONST_5      = 0x08
 	LDC           = 0x12
 	ALOAD         = 0x19
+	ALOAD_0       = 0x2A
 	ASTORE        = 0x3A
+	ASTORE_0      = 0x4B
 	IADD          = 0x60
 	LADD          = 0x61
 	FADD          = 0x62
@@ -31,13 +33,11 @@ const (
 	IFGE          = 0x9C
 	IFGT          = 0x9D
 	IFLE          = 0x9E
-	ALOAD_0       = 0x2A
-	ASTORE_0      = 0x3A
 	GOTO          = 0xA7
 	IRETURN       = 0xAC
 	LRETURN       = 0xAD
 	FRETURN       = 0xAE
-	DRETURN       = 0xAD
+	DRETURN       = 0xAF
 	ARETURN       = 0xB0
 	RETURN        = 0xB1
 	INVOKESPECIAL = 0xB7
@@ -46,6 +46,9 @@ const (
 	IFNULL        = 0xC6
 	IFNONNULL     = 0xC7
 	GOTOW         = 0xC8
+
+	GotoSize = 3
+	IfSize   = 3
 
 	maxGotoSize = 65535
 )

@@ -33,7 +33,7 @@ type VariableGet struct {
 	Variable Variable
 }
 
-func (v VariableGet) GetInstructions(_ int, stack *Stack, _ *constantpool.ConstantPool) []byte {
+func (v VariableGet) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	var instructions []byte
 
 	if v.Variable.IsLocal() {
@@ -43,12 +43,15 @@ func (v VariableGet) GetInstructions(_ int, stack *Stack, _ *constantpool.Consta
 		// TODO
 		panic("implement me")
 	}
-	stack.Push()
 	return instructions
 }
 
 func (v VariableGet) FillConstantsPool(_ *constantpool.ConstantPool) {
 	// No constants
+}
+
+func (v VariableGet) MaxStack() int {
+	return 1
 }
 
 func NewVariableGet(variable Variable) VariableGet {
@@ -60,16 +63,23 @@ type VariableSet struct {
 	Value    Statement
 }
 
-func (v VariableSet) GetInstructions(writeIndex int, stack *Stack, pool *constantpool.ConstantPool) []byte {
-	instructions := v.Value.GetInstructions(writeIndex, stack, pool)
+func (v VariableSet) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := v.Value.GetInstructions(stack, pool)
 	index := stack.Store(v.Variable)
 	instructions = append(instructions, opcodes.GetAStoreInstruction(index)...)
-	stack.Pop()
 	return instructions
 }
 
 func (v VariableSet) FillConstantsPool(pool *constantpool.ConstantPool) {
 	v.Value.FillConstantsPool(pool)
+}
+
+func (v VariableSet) MaxStack() int {
+	if v.Value == nil {
+		return 0
+	} else {
+		return v.Value.MaxStack()
+	}
 }
 
 func NewVariableSet(variable Variable, value Statement) VariableSet {
