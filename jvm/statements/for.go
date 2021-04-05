@@ -31,9 +31,14 @@ func (f ForLoop) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) 
 		nestedInstructions = append(nestedInstructions, f.Increment.GetInstructions(stack, pool)...)
 	}
 
-	nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstructionI(-len(nestedInstructions))...)
+	// FIXME This needs a cleanup. We currently generate the condition instructions twice, one here and once later
+	// If instructions are written here so we can have a clear idea of their length for the goto jump backwards
+	ifInstructions := f.Condition.GetInstructions(0, stack, pool)
 
-	instructions = append(instructions, f.Condition.GetInstructions(uint(len(instructions)), stack, pool)...)
+	gotoJump := -len(ifInstructions) - len(nestedInstructions)
+	nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstructionI(gotoJump)...)
+
+	instructions = append(instructions, f.Condition.GetInstructions(uint(len(nestedInstructions)+1), stack, pool)...)
 	instructions = append(instructions, nestedInstructions...)
 
 	return instructions
