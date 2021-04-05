@@ -9,15 +9,14 @@ import (
 const (
 	StandardLibraryClassName = "StandardLibrary"
 	AppendMethod             = "append"
-
-	appendMethodOriginalArg   = "original"
-	appendMethodAdditionalArg = "additional"
+	JoinMethod               = "join"
 )
 
 func NewStandardLib() definitions.Class {
 	class := definitions.NewClass(StandardLibraryClassName, types.ObjectClass)
 	class.AddMethod(constructorMethod())
 	class.AddMethod(appendMethod())
+	class.AddMethod(joinMethod())
 	return class
 }
 
@@ -37,8 +36,9 @@ func constructorMethod() definitions.Method {
 
 func appendMethod() definitions.Method {
 	appendMethod := definitions.NewMethod(AppendMethod, definitions.Public, definitions.Static, definitions.VarArgs)
-	originalArg := statements.NewLocalVariable(appendMethodOriginalArg, types.ObjectClass)
-	additionalArg := statements.NewLocalVariable(appendMethodAdditionalArg, types.ObjectClass)
+	appendMethod.ReturnType = types.ObjectClass.Array()
+	originalArg := statements.NewLocalVariable("original", types.ObjectClass)
+	additionalArg := statements.NewLocalVariable("additional", types.ObjectClass.Array())
 	appendMethod.AddArgument(originalArg)
 	appendMethod.AddArgument(additionalArg)
 
@@ -112,7 +112,11 @@ func appendMethod() definitions.Method {
 		),
 	)
 
-	ifOriginalIsNull := statements.IfNull.New(statements.NewVariableGet(originalArg))
+	ifOriginalIsNull := statements.NewIf(
+		statements.IsNull.New(
+			statements.NewVariableGet(originalArg),
+		),
+	)
 	ifOriginalIsNull.Success = originalIsNull
 	ifOriginalIsNull.Failure = originalIsNotNull
 	appendMethod.AddStatement(ifOriginalIsNull)
@@ -125,4 +129,49 @@ func appendMethod() definitions.Method {
 	)
 
 	return appendMethod
+}
+
+func joinMethod() definitions.Method {
+	joinMethod := definitions.NewMethod(JoinMethod, definitions.Private, definitions.Static, definitions.VarArgs)
+	joinMethod.ReturnType = types.MustParse("java.lang.String")
+	objectsArg := statements.NewLocalVariable("objects", types.ObjectClass.Array())
+	joinMethod.AddArgument(objectsArg)
+
+	stringJoinerClass := types.MustParse("java.util.StringJoiner")
+	joinMethod.AddStatement(
+		statements.NewInitInvocation(
+			stringJoinerClass,
+			statements.NewStringConstant(" "),
+		),
+	)
+
+	forIndex := statements.NewLocalVariable("i", types.Int)
+	forBlock := statements.NewBlock()
+
+	joinMethod.AddStatement(
+		statements.NewForLoop(
+			forBlock,
+			statements.NewVariableSet(
+				forIndex,
+				statements.NewIntConstant(0),
+			),
+			statements.IsLessThan.New(
+				statements.SubInt.New(
+					statements.NewVariableGet(forIndex),
+					statements.NewArrayLen(
+						statements.NewVariableGet(objectsArg),
+					),
+				),
+			),
+			statements.NewVariableSet(
+				forIndex,
+				statements.AddInt.New(
+					statements.NewVariableGet(forIndex),
+					statements.NewIntConstant(1),
+				),
+			),
+		),
+	)
+
+	return joinMethod
 }

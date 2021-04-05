@@ -3,6 +3,7 @@ package opcodes
 import jvmio "go-on-jvm/jvm/io"
 
 const (
+	NOP           = 0x00
 	ICONST_M1     = 0x02
 	ICONST_0      = 0x03
 	ICONST_1      = 0x04
@@ -15,6 +16,9 @@ const (
 	ALOAD_0       = 0x2A
 	ASTORE        = 0x3A
 	ASTORE_0      = 0x4B
+	POP           = 0x57
+	POP2          = 0x58
+	DUP           = 0x59
 	IADD          = 0x60
 	LADD          = 0x61
 	FADD          = 0x62
@@ -42,6 +46,7 @@ const (
 	RETURN        = 0xB1
 	INVOKESPECIAL = 0xB7
 	INVOKESTATIC  = 0xB8
+	NEW           = 0xBB
 	ARRAYLENGTH   = 0xBE
 	IFNULL        = 0xC6
 	IFNONNULL     = 0xC7

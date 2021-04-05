@@ -88,6 +88,12 @@ func (c *ConstantPool) FindIntConstant(constant int) int {
 	})
 }
 
+func (c *ConstantPool) FindStringConstant(constant string) int {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isString(item, constant)
+	})
+}
+
 func (c *ConstantPool) findItem(predicate func(item constantPoolItem) bool) int {
 	for i, item := range c.Items {
 		if predicate(item) {
@@ -137,6 +143,14 @@ func (c *ConstantPool) AddIntConstant(constant int) {
 		return
 	}
 	c.addItem(newIntConstant(constant))
+}
+
+func (c *ConstantPool) AddStringConstant(constant string) {
+	if c.FindStringConstant(constant) > 0 {
+		return
+	}
+	c.addItem(newStringConstant(constant))
+	c.AddUTF8(constant)
 }
 
 func (c *ConstantPool) addItem(item constantPoolItem) {

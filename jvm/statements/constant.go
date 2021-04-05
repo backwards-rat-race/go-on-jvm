@@ -53,3 +53,24 @@ func (i IntConstant) requiresPoolEntry() bool {
 func NewIntConstant(constant int) IntConstant {
 	return IntConstant{Constant: constant}
 }
+
+type StringConstant struct {
+	Constant string
+}
+
+func (s StringConstant) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := []byte{opcodes.LDC}
+	return jvmio.AppendPaddedBytes(instructions, pool.FindStringConstant(s.Constant), 1)
+}
+
+func (s StringConstant) FillConstantsPool(pool *constantpool.ConstantPool) {
+	pool.AddStringConstant(s.Constant)
+}
+
+func (s StringConstant) MaxStack() int {
+	return 1
+}
+
+func NewStringConstant(constant string) StringConstant {
+	return StringConstant{Constant: constant}
+}
