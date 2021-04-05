@@ -42,7 +42,7 @@ func (i IntConstant) FillConstantsPool(pool *constantpool.ConstantPool) {
 	}
 }
 
-func (i IntConstant) MaxStack() int {
+func (i IntConstant) MaxStack() uint {
 	return 1
 }
 
@@ -67,7 +67,7 @@ func (s StringConstant) FillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddStringConstant(s.Constant)
 }
 
-func (s StringConstant) MaxStack() int {
+func (s StringConstant) MaxStack() uint {
 	return 1
 }
 

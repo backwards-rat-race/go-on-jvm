@@ -157,7 +157,7 @@ func (c codeAttributeSerialiser) Write(w io.Writer) error {
 
 	// Written internal data. Now we know the length
 	// u4 attribute_length;
-	err = jvmio.WritePaddedBytes(w, buffer.Len(), 4)
+	err = jvmio.WritePaddedBytesI(w, buffer.Len(), 4)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func (c codeAttributeSerialiser) writeAttributeData(w io.Writer) error {
 	}
 
 	// u4 code_length
-	err = jvmio.WritePaddedBytes(w, len(instructions), 4)
+	err = jvmio.WritePaddedBytesI(w, len(instructions), 4)
 	if err != nil {
 		return err
 	}

@@ -20,8 +20,8 @@ func (b Block) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []
 	return instructions
 }
 
-func (b Block) MaxStack() int {
-	max := 0
+func (b Block) MaxStack() uint {
+	var max uint = 0
 
 	for _, statement := range b.Statements {
 		max = iMax(max, statement.MaxStack())
@@ -54,7 +54,7 @@ func NewBlock() Block {
 	return Block{}
 }
 
-func iMax(x, y int) int {
+func iMax(x, y uint) uint {
 	if x > y {
 		return x
 	} else {

@@ -50,7 +50,7 @@ func (v VariableGet) FillConstantsPool(_ *constantpool.ConstantPool) {
 	// No constants
 }
 
-func (v VariableGet) MaxStack() int {
+func (v VariableGet) MaxStack() uint {
 	return 1
 }
 
@@ -74,7 +74,7 @@ func (v VariableSet) FillConstantsPool(pool *constantpool.ConstantPool) {
 	v.Value.FillConstantsPool(pool)
 }
 
-func (v VariableSet) MaxStack() int {
+func (v VariableSet) MaxStack() uint {
 	if v.Value == nil {
 		return 0
 	} else {

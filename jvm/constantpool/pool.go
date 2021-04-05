@@ -58,46 +58,46 @@ func (c ConstantPool) Write(w io.Writer) error {
 	return nil
 }
 
-func (c *ConstantPool) FindClassNameItem(name string) int {
+func (c *ConstantPool) FindClassNameItem(name string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isClass(item, name)
 	})
 }
 
-func (c *ConstantPool) FindUTF8Item(value string) int {
+func (c *ConstantPool) FindUTF8Item(value string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isUtf8(item, value)
 	})
 }
 
-func (c *ConstantPool) FindMethodReference(class string, name string, typeDescriptor string) int {
+func (c *ConstantPool) FindMethodReference(class string, name string, typeDescriptor string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isMethodReference(item, class, name, typeDescriptor)
 	})
 }
 
-func (c *ConstantPool) FindNameAndType(name string, typeDescriptor string) int {
+func (c *ConstantPool) FindNameAndType(name string, typeDescriptor string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isNameAndType(item, name, typeDescriptor)
 	})
 }
 
-func (c *ConstantPool) FindIntConstant(constant int) int {
+func (c *ConstantPool) FindIntConstant(constant int) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isInt(item, constant)
 	})
 }
 
-func (c *ConstantPool) FindStringConstant(constant string) int {
+func (c *ConstantPool) FindStringConstant(constant string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isString(item, constant)
 	})
 }
 
-func (c *ConstantPool) findItem(predicate func(item constantPoolItem) bool) int {
+func (c *ConstantPool) findItem(predicate func(item constantPoolItem) bool) uint {
 	for i, item := range c.Items {
 		if predicate(item) {
-			return i
+			return uint(i)
 		}
 	}
 
@@ -171,5 +171,5 @@ func (p poolSize) isTag(_ ConstantPoolTag) bool {
 }
 
 func (p poolSize) write(w io.Writer, constantPool ConstantPool, _ int) error {
-	return jvmio.WritePaddedBytes(w, len(constantPool.Items), 2)
+	return jvmio.WritePaddedBytesI(w, len(constantPool.Items), 2)
 }

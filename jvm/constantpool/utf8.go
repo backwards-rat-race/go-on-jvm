@@ -22,7 +22,7 @@ func (u Utf8Item) write(w io.Writer, _ ConstantPool, _ int) error {
 	}
 
 	// We want the length in bytes, not Rune length
-	err = jvmio.WritePaddedBytes(w, len(u.Value), 2)
+	err = jvmio.WritePaddedBytesI(w, len(u.Value), 2)
 	if err != nil {
 		return err
 	}

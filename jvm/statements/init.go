@@ -40,8 +40,8 @@ func (i InitInvocation) FillConstantsPool(pool *constantpool.ConstantPool) {
 	}
 }
 
-func (i InitInvocation) MaxStack() int {
-	max := len(i.Args)
+func (i InitInvocation) MaxStack() uint {
+	max := uint(len(i.Args))
 
 	for _, statement := range i.Args {
 		max = iMax(max, statement.MaxStack())

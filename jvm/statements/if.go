@@ -21,18 +21,18 @@ func (i If) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byt
 	}
 
 	nestedInstructions := i.Success.GetInstructions(stack, pool)
-	jumpTo := +opcodes.IfSize
+	jumpTo := uint(opcodes.IfSize)
 
 	if i.Failure.Empty() {
-		jumpTo += len(nestedInstructions)
+		jumpTo += uint(len(nestedInstructions))
 	} else {
 		failureInstructions := i.Failure.GetInstructions(stack, pool)
 
 		// Now we know how long the failure branch is we can add the goto instruction
 		// at the end of the success block (the instruction after failure
 		gotoJump := len(failureInstructions) + opcodes.GotoSize
-		nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstruction(gotoJump)...)
-		jumpTo += len(nestedInstructions)
+		nestedInstructions = append(nestedInstructions, opcodes.GetGotoInstructionI(gotoJump)...)
+		jumpTo += uint(len(nestedInstructions))
 		nestedInstructions = append(nestedInstructions, failureInstructions...)
 	}
 
@@ -49,7 +49,7 @@ func (i If) FillConstantsPool(pool *constantpool.ConstantPool) {
 	i.Failure.FillConstantsPool(pool)
 }
 
-func (i If) MaxStack() int {
+func (i If) MaxStack() uint {
 	return iMax(i.Failure.MaxStack(), i.Success.MaxStack())
 }
 

@@ -22,7 +22,7 @@ const (
 
 var CompareNothing = Comparison{}
 
-func (c ComparisonType) opcode() int {
+func (c ComparisonType) opcode() uint {
 	switch c {
 	case IsNull:
 		return opcodes.IFNULL
@@ -77,7 +77,7 @@ type Comparison struct {
 	Statement Statement
 }
 
-func (c Comparison) GetInstructions(jump int, stack *Stack, pool *constantpool.ConstantPool) []byte {
+func (c Comparison) GetInstructions(jump uint, stack *Stack, pool *constantpool.ConstantPool) []byte {
 	if c == CompareNothing {
 		return nil
 	}
@@ -97,6 +97,6 @@ func (c Comparison) FillConstantsPool(pool *constantpool.ConstantPool) {
 	c.Statement.FillConstantsPool(pool)
 }
 
-func (c Comparison) MaxStack() int {
+func (c Comparison) MaxStack() uint {
 	return c.Statement.MaxStack()
 }

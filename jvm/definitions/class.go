@@ -122,7 +122,7 @@ func (c Class) writeClassSpecifier(w io.Writer, pool *constantpool.ConstantPool)
 // TODO, reduce duplication of writeFields and writeMethods
 
 func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
-	err := jvmio.WritePaddedBytes(w, len(c.Fields), 2)
+	err := jvmio.WritePaddedBytesI(w, len(c.Fields), 2)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (c Class) writeFields(w io.Writer, pool *constantpool.ConstantPool) error {
 }
 
 func (c Class) writeMethods(w io.Writer, pool *constantpool.ConstantPool) error {
-	err := jvmio.WritePaddedBytes(w, len(c.Methods), 2)
+	err := jvmio.WritePaddedBytesI(w, len(c.Methods), 2)
 	if err != nil {
 		return err
 	}

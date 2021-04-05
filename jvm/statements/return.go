@@ -18,7 +18,7 @@ const (
 	ReturnDouble
 )
 
-func (r ReturnType) opcode() int {
+func (r ReturnType) opcode() uint {
 	switch r {
 	case ReturnVoid:
 		return opcodes.RETURN
@@ -60,7 +60,7 @@ func (r Return) FillConstantsPool(pool *constantpool.ConstantPool) {
 	}
 }
 
-func (r Return) MaxStack() int {
+func (r Return) MaxStack() uint {
 	if r.Type == ReturnVoid {
 		return 0
 	}

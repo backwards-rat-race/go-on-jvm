@@ -54,8 +54,6 @@ const (
 
 	GotoSize = 3
 	IfSize   = 3
-
-	maxGotoSize = 65535
 )
 
 func GetALoadInstruction(index int) []byte {
@@ -74,12 +72,12 @@ func GetAStoreInstruction(index int) []byte {
 	}
 }
 
-func GetGotoInstruction(line int) []byte {
-	if line > maxGotoSize {
-		panic("wide goto not yet supported. max method size reached")
-	} else {
-		instruction := []byte{byte(GOTO)}
-		instruction = jvmio.AppendPaddedBytes(instruction, line, 2)
-		return instruction
-	}
+func GetGotoInstruction(line uint16) []byte {
+	instruction := []byte{byte(GOTO)}
+	instruction = jvmio.AppendPaddedBytes(instruction, uint(line), 2)
+	return instruction
+}
+
+func GetGotoInstructionI(line int) []byte {
+	return GetGotoInstruction(uint16(line))
 }

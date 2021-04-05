@@ -27,6 +27,6 @@ func (s *Stack) Store(variable Variable) int {
 	return index
 }
 
-func (s Stack) MaxLocals() int {
-	return len(s.Locals)
+func (s Stack) MaxLocals() uint {
+	return uint(len(s.Locals))
 }

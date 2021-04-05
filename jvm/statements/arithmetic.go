@@ -26,7 +26,7 @@ const (
 	MultiplyDouble
 )
 
-func (a ArithmeticType) OpCode() int {
+func (a ArithmeticType) OpCode() uint {
 	switch a {
 	case AddInt:
 		return opcodes.IADD
@@ -79,6 +79,6 @@ func (a Arithmetic) FillConstantsPool(pool *constantpool.ConstantPool) {
 	a.Right.FillConstantsPool(pool)
 }
 
-func (a Arithmetic) MaxStack() int {
+func (a Arithmetic) MaxStack() uint {
 	return a.Left.MaxStack() + a.Right.MaxStack()
 }

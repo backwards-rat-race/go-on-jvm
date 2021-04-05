@@ -30,10 +30,10 @@ const (
 )
 
 func writeAccessModifier(w io.Writer, accessModifiers []AccessModifier) error {
-	var access int
+	var access uint
 
 	for _, modifier := range accessModifiers {
-		access |= int(modifier)
+		access |= uint(modifier)
 	}
 
 	return jvmio.WritePaddedBytes(w, access, 2)

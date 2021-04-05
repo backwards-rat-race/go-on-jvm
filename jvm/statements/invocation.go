@@ -53,8 +53,8 @@ func (i Invocation) FillConstantsPool(pool *constantpool.ConstantPool) {
 	pool.AddMethodReference(i.MethodReference.Class.Jvm(), i.MethodReference.Name, i.MethodReference.Type.Descriptor())
 }
 
-func (i Invocation) MaxStack() int {
-	max := len(i.Vars)
+func (i Invocation) MaxStack() uint {
+	max := uint(len(i.Vars))
 
 	for _, statement := range i.Vars {
 		max = iMax(max, statement.MaxStack())
@@ -63,7 +63,7 @@ func (i Invocation) MaxStack() int {
 	return max
 }
 
-func (i Invocation) opcode() int {
+func (i Invocation) opcode() uint {
 	if i.Static {
 		return opcodes.INVOKESTATIC
 	} else {

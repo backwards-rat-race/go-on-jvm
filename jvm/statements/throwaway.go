@@ -20,7 +20,7 @@ func (t ThrowAway) FillConstantsPool(pool *constantpool.ConstantPool) {
 	t.Statement.FillConstantsPool(pool)
 }
 
-func (t ThrowAway) MaxStack() int {
+func (t ThrowAway) MaxStack() uint {
 	return t.Statement.MaxStack()
 }
 

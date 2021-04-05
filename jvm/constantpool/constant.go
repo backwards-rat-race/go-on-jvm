@@ -20,7 +20,7 @@ func (i IntConstantItem) write(w io.Writer, _ ConstantPool, _ int) error {
 		return err
 	}
 
-	err = jvmio.WritePaddedBytes(w, i.Constant, 1)
+	err = jvmio.WritePaddedBytesI(w, i.Constant, 1)
 	if err != nil {
 		return err
 	}

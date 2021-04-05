@@ -20,7 +20,7 @@ func (a ArrayLen) FillConstantsPool(pool *constantpool.ConstantPool) {
 	a.Array.FillConstantsPool(pool)
 }
 
-func (a ArrayLen) MaxStack() int {
+func (a ArrayLen) MaxStack() uint {
 	if a.Array == nil {
 		return 0
 	} else {
