@@ -10,11 +10,13 @@ const (
 	StandardLibraryClassName = "StandardLibrary"
 	AppendMethod             = "append"
 	JoinMethod               = "join"
+	PrintlnMethod            = "println"
 )
 
 func NewStandardLib() definitions.Class {
 	class := definitions.NewClass(StandardLibraryClassName, types.ObjectClass)
 	class.AddMethod(constructorMethod())
+	class.AddMethod(printlnMethod())
 	class.AddMethod(appendMethod())
 	class.AddMethod(joinMethod())
 	return class
@@ -32,6 +34,46 @@ func constructorMethod() definitions.Method {
 	constructor.AddStatement(statements.NewVoidReturn())
 
 	return constructor
+}
+
+func printlnMethod() definitions.Method {
+	printlnMethod := definitions.NewMethod(PrintlnMethod, definitions.Public, definitions.Static, definitions.VarArgs)
+	printlnMethod.ReturnType = types.Void
+	objectsArg := statements.NewLocalVariable("objects", types.ObjectClass.Array())
+	printlnMethod.AddArgument(objectsArg)
+
+	stringClass := types.MustParse("java.lang.String")
+
+	printlnReference := statements.NewMethodReference(
+		types.MustParse("java.io.PrintStream"),
+		"println",
+		types.Void,
+		stringClass,
+	)
+	joinReference := statements.NewMethodReference(
+		types.MustParse(StandardLibraryClassName),
+		"join",
+		stringClass,
+		types.ObjectClass.Array(),
+	)
+	printlnMethod.AddStatement(
+		statements.NewInvocation(
+			printlnReference,
+			statements.NewStaticVariableGet(
+				statements.NewStaticVariable(
+					"java/lang/System",
+					"out",
+					types.MustParse("java.io.PrintStream"),
+				),
+			),
+			statements.NewStaticInvocation(
+				joinReference,
+				statements.NewVariableGet(objectsArg),
+			),
+		),
+	)
+	printlnMethod.AddStatement(statements.NewVoidReturn())
+	return printlnMethod
 }
 
 func appendMethod() definitions.Method {

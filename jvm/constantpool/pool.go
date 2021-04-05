@@ -70,9 +70,15 @@ func (c *ConstantPool) FindUTF8Item(value string) uint {
 	})
 }
 
-func (c *ConstantPool) FindMethodReference(class string, name string, typeDescriptor string) uint {
+func (c *ConstantPool) FindMethodReference(class, name, typeDescriptor string) uint {
 	return c.findItem(func(item constantPoolItem) bool {
 		return isMethodReference(item, class, name, typeDescriptor)
+	})
+}
+
+func (c *ConstantPool) FindFieldReference(class, name, typeDescriptor string) uint {
+	return c.findItem(func(item constantPoolItem) bool {
+		return isFieldReference(item, class, name, typeDescriptor)
 	})
 }
 
@@ -120,11 +126,20 @@ func (c *ConstantPool) AddUTF8(value string) {
 	c.addItem(newUtf8Constant(value))
 }
 
-func (c *ConstantPool) AddMethodReference(class string, name string, typeDescriptor string) {
+func (c *ConstantPool) AddMethodReference(class, name, typeDescriptor string) {
 	if c.FindMethodReference(class, name, typeDescriptor) > 0 {
 		return
 	}
 	c.addItem(newMethodReference(class, name, typeDescriptor))
+	c.AddClassReference(class)
+	c.AddNameAndType(name, typeDescriptor)
+}
+
+func (c *ConstantPool) AddFieldReference(class, name, typeDescriptor string) {
+	if c.FindFieldReference(class, name, typeDescriptor) > 0 {
+		return
+	}
+	c.addItem(newFieldReference(class, name, typeDescriptor))
 	c.AddClassReference(class)
 	c.AddNameAndType(name, typeDescriptor)
 }

@@ -2,6 +2,7 @@ package statements
 
 import (
 	"go-on-jvm/jvm/constantpool"
+	jvmio "go-on-jvm/jvm/io"
 	"go-on-jvm/jvm/opcodes"
 	jvmtypes "go-on-jvm/jvm/types"
 )
@@ -12,21 +13,12 @@ var (
 )
 
 type Variable struct {
-	Object string
-	Name   string
-	Type   jvmtypes.TypeReference
+	Name string
+	Type jvmtypes.TypeReference
 }
 
 func NewLocalVariable(name string, typeDescriptor jvmtypes.TypeReference) Variable {
 	return Variable{Name: name, Type: typeDescriptor}
-}
-
-func NewObjectVariable(object string, name string, typeDescriptor jvmtypes.TypeReference) Variable {
-	return Variable{object, name, typeDescriptor}
-}
-
-func (v Variable) IsLocal() bool {
-	return v.Object == ""
 }
 
 type VariableGet struct {
@@ -36,13 +28,9 @@ type VariableGet struct {
 func (v VariableGet) GetInstructions(stack *Stack, pool *constantpool.ConstantPool) []byte {
 	var instructions []byte
 
-	if v.Variable.IsLocal() {
-		index := stack.Load(v.Variable)
-		instructions = opcodes.GetALoadInstruction(index)
-	} else {
-		// TODO
-		panic("implement me")
-	}
+	index := stack.Load(v.Variable)
+	instructions = opcodes.GetALoadInstruction(index)
+
 	return instructions
 }
 
@@ -84,4 +72,50 @@ func (v VariableSet) MaxStack() uint {
 
 func NewVariableSet(variable Variable, value Statement) VariableSet {
 	return VariableSet{variable, value}
+}
+
+type StaticVariable struct {
+	Variable
+	Class string
+}
+
+func NewStaticVariable(class string, name string, typeDescriptor jvmtypes.TypeReference) StaticVariable {
+	return StaticVariable{
+		Variable: NewLocalVariable(name, typeDescriptor),
+		Class:    class,
+	}
+}
+
+type StaticVariableGet struct {
+	Variable StaticVariable
+}
+
+func (s StaticVariableGet) GetInstructions(_ *Stack, pool *constantpool.ConstantPool) []byte {
+	instructions := []byte{opcodes.GETSTATIC}
+	instructions = jvmio.AppendPaddedBytes(
+		instructions,
+		pool.FindFieldReference(
+			s.Variable.Class,
+			s.Variable.Name,
+			s.Variable.Type.JvmRef(),
+		),
+		2,
+	)
+	return instructions
+}
+
+func (s StaticVariableGet) FillConstantsPool(pool *constantpool.ConstantPool) {
+	pool.AddFieldReference(
+		s.Variable.Class,
+		s.Variable.Name,
+		s.Variable.Type.JvmRef(),
+	)
+}
+
+func (s StaticVariableGet) MaxStack() uint {
+	return 1
+}
+
+func NewStaticVariableGet(variable StaticVariable) StaticVariableGet {
+	return StaticVariableGet{variable}
 }

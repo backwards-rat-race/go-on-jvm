@@ -92,7 +92,10 @@ func (m MethodType) Descriptor() string {
 
 	typeDescriptor += ")"
 	typeDescriptor += m.ReturnType.JvmRef()
-	typeDescriptor += ";"
+
+	if m.ReturnType != Void {
+		typeDescriptor += ";"
+	}
 
 	return typeDescriptor
 }
