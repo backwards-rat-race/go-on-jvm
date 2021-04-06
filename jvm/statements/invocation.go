@@ -30,6 +30,10 @@ func (m MethodReference) IsVoid() bool {
 	return m.Type.ReturnType == jvmtypes.Void
 }
 
+func (m MethodReference) IsInit() bool {
+	return m.Name == jvmtypes.ConstructorName
+}
+
 type Invocation struct {
 	MethodReference MethodReference
 	Static          bool
@@ -69,8 +73,10 @@ func (i Invocation) MaxStack() uint {
 func (i Invocation) opcode() uint {
 	if i.Static {
 		return opcodes.INVOKESTATIC
-	} else {
+	} else if i.MethodReference.IsInit() { // FIXME feels like this needs handling differently
 		return opcodes.INVOKESPECIAL
+	} else {
+		return opcodes.INVOKEVIRTUAL
 	}
 }
 
