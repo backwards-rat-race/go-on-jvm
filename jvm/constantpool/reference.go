@@ -21,7 +21,7 @@ func newFieldReference(class, name, typeDescriptor string) ReferenceItem {
 }
 
 func (m ReferenceItem) isTag(tag ConstantPoolTag) bool {
-	return tag == MethodReference
+	return tag == m.Tag
 }
 
 func (m ReferenceItem) write(w io.Writer, constantPool ConstantPool, _ int) error {
