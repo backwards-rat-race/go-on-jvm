@@ -8,6 +8,9 @@ import (
 
 var (
 	dotReference = regexp.MustCompile(`^\[?([a-zA-Z_$][a-zA-Z\d_$]*\.*)*([a-zA-Z_$][a-zA-Z\d_$]*)$`)
+	jvmClassRef  = regexp.MustCompile(`^L([a-zA-Z_$][a-zA-Z\d_$]*/*)*([a-zA-Z_$][a-zA-Z\d_$]*);$`)
+	jvmArrayRef  = regexp.MustCompile(`^\[L([a-zA-Z_$][a-zA-Z\d_$]*/*)*([a-zA-Z_$][a-zA-Z\d_$]*);$`)
+	jvmArray     = regexp.MustCompile(`^\[([a-zA-Z_$][a-zA-Z\d_$]*/*)*([a-zA-Z_$][a-zA-Z\d_$]*)$`)
 	jvmReference = regexp.MustCompile(`^\[?([a-zA-Z_$][a-zA-Z\d_$]*/*)*([a-zA-Z_$][a-zA-Z\d_$]*)$`)
 )
 
@@ -27,7 +30,7 @@ func (t TypeReference) JvmRef() string {
 	if t.IsPrimitive() || t.IsArray() {
 		return t.Jvm()
 	} else {
-		return classRef + t.Jvm()
+		return classRef + t.Jvm() + ";"
 	}
 }
 
@@ -56,9 +59,16 @@ func (t TypeReference) IsPrimitive() bool {
 
 func Parse(typeName string) (TypeReference, error) {
 	switch {
-	case jvmReference.MatchString(typeName):
-		jvmReference := strings.TrimPrefix(typeName, classRef)
+	case jvmClassRef.MatchString(typeName):
+		jvmReference := strings.TrimSuffix(strings.TrimPrefix(typeName, "L"), ";")
 		return TypeReference{reference: jvmReference}, nil
+
+	case jvmArray.MatchString(typeName):
+		fallthrough
+	case jvmArrayRef.MatchString(typeName):
+		fallthrough
+	case jvmReference.MatchString(typeName):
+		return TypeReference{reference: typeName}, nil
 
 	case dotReference.MatchString(typeName):
 		jvmReference := strings.ReplaceAll(typeName, ".", "/")
@@ -87,15 +97,10 @@ func (m MethodType) Descriptor() string {
 
 	for _, argType := range m.Arguments {
 		typeDescriptor += argType.JvmRef()
-		typeDescriptor += ";"
 	}
 
 	typeDescriptor += ")"
 	typeDescriptor += m.ReturnType.JvmRef()
-
-	if m.ReturnType != Void {
-		typeDescriptor += ";"
-	}
 
 	return typeDescriptor
 }
